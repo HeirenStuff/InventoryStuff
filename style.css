@@ -1,10 +1,7 @@
 :root {
     --bg-dark: #0a0a0a;
-    --panel-bg: #1a1a1a;
     --accent-gold: #d4af37;
-    --item-bg: rgba(212, 175, 55, 0.1);
-    --border-color: #444;
-    --text-green: #0f0;
+    --item-bg: rgba(212, 175, 55, 0.15);
 }
 
 body {
@@ -13,122 +10,54 @@ body {
     font-family: 'Courier New', Courier, monospace;
     width: 350px;
     padding: 10px;
-    user-select: none;
     margin: 0;
 }
 
 .hidden { display: none !important; }
 
-#role-badge {
-    font-size: 10px;
-    text-align: right;
-    margin-bottom: 5px;
-    letter-spacing: 1px;
-}
-
-.coin-container h2 {
-    margin: 5px 0;
-    font-size: 18px;
-    border-bottom: 1px solid var(--accent-gold);
-}
-
-/* MONEDAS EN HORIZONTAL */
+/* MONEDAS HORIZONTALES */
 .currency-container {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 15px;
-    background: #151515;
-    padding: 8px;
+    margin: 10px 0;
+    padding: 5px;
     border: 1px solid #333;
 }
 
 .currency-field {
     display: flex;
     align-items: center;
-    gap: 5px;
-}
-
-.currency-field span {
-    font-weight: bold;
-    font-size: 12px;
+    gap: 4px;
 }
 
 input[type="number"] {
     width: 45px;
     background: #000;
-    color: var(--text-green);
+    color: #0f0;
     border: 1px solid var(--accent-gold);
-    padding: 2px;
-    font-family: 'Courier New', Courier, monospace;
 }
 
-/* GRID */
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: #333;
-    width: 327px; /* 8 * 40px + gaps */
+    background-color: #222;
     border: 2px solid var(--accent-gold);
     position: relative;
-    margin: 0 auto;
 }
 
-.slot {
-    width: 40px;
-    height: 40px;
-    background-color: #111;
-}
-
-.slot.locked {
-    background-image: repeating-linear-gradient(45deg, #000, #000 2px, #222 2px, #222 4px);
-}
+.slot { width: 40px; height: 40px; background-color: #111; }
+.slot.locked { background: repeating-linear-gradient(45deg, #000, #000 2px, #222 2px, #222 4px); }
 
 .item {
     position: absolute;
     background: var(--item-bg);
     border: 1px solid var(--accent-gold);
-    box-sizing: border-box;
-    z-index: 100;
-    cursor: grab;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 }
 
-.item img {
-    max-width: 90%;
-    max-height: 90%;
-    pointer-events: none;
-}
-
-/* GM CONSOLE */
-#gm-console {
-    background: #222;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #d4af37;
-}
-
-.gm-controls {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-select, button {
-    background: #000;
-    color: #fff;
-    border: 1px solid var(--accent-gold);
-    padding: 3px;
-    font-family: sans-serif;
-}
-
-.gm-hint {
-    font-size: 9px;
-    color: #aaa;
-    margin-top: 5px;
-}
+.item img { max-width: 90%; max-height: 90%; pointer-events: none; }
