@@ -1,42 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventario RE</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBR Info</title>
+  <style>
+    /* Estilo visual compacto */
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: white;
+      background: #242424;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    #info-card {
+      background: #333;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      min-width: 150px;
+    }
+    .role {
+      font-weight: bold;
+      color: #bb86fc;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .name {
+      font-size: 1.1em;
+      color: #03dac6;
+    }
+  </style>
 </head>
-<body style="background: #1a1a1a; color: white; font-family: sans-serif; text-align: center;">
-    
-    <h1 id="status">Iniciando...</h1>
-    <div id="player-info"></div>
+<body>
 
-    <!-- Usamos type="module" para poder usar imports como en tu ejemplo -->
-    <script type="module">
-        // Importamos el SDK como un módulo de internet, igual que el "import OBR" de Svelte
-        import OBR from "https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js";
+  <div id="app">
+    <div id="info-card">Cargando datos...</div>
+  </div>
 
-        const status = document.getElementById("status");
-        const info = document.getElementById("player-info");
+  <!-- Importamos la SDK de Owlbear Rodeo -->
+  <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
 
-        async function start() {
-            // Imita el "if (OBR.isAvailable)" de tu ejemplo
-            if (OBR.isAvailable) {
-                OBR.onReady(async () => {
-                    const name = await OBR.player.getName();
-                    const role = await OBR.player.getRole();
+  <script>
+    // Esperamos a que la SDK esté lista
+    OBR.onReady(async () => {
+      const app = document.getElementById('info-card');
 
-                    status.innerText = "¡CONECTADO!";
-                    status.style.color = "#d4af37";
-                    info.innerHTML = `Jugador: ${name} | Rol: ${role}`;
-                    
-                    console.log("Conexión establecida con éxito.");
-                });
-            } else {
-                status.innerText = "Error: No se detecta Owlbear Rodeo";
-                console.error("OBR no está disponible. ¿Estás abriendo esto fuera de Owlbear?");
-            }
+      async function updateInfo() {
+        // Obtenemos el Rol y el Nombre usando la API de Player
+        const role = await OBR.player.getRole();
+        const name = await OBR.player.getName();
+
+        if (role === "GM") {
+          app.innerHTML = `<span class="role">Eres el GM</span>`;
+        } else {
+          app.innerHTML = `
+            <span class="role">Jugador</span>
+            <span class="name">${name}</span>
+          `;
         }
+      }
 
-        start();
-    </script>
+      // Ejecutar al cargar
+      updateInfo();
+
+      // Opcional: Suscribirse a cambios por si el usuario cambia su nombre
+      OBR.player.onChange(() => {
+        updateInfo();
+      });
+    });
+  </script>
 </body>
 </html>
