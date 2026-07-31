@@ -49,35 +49,45 @@ async function setupDMView() {
 
 function render(data) {
     const inventories = data.inventories || {};
-    const inv = inventories[viewedPlayerId] || { items: [], coins: 0, enabledSlots: [] };
+    const inv = inventories[viewedPlayerId] || { items: [], coins: { gold: 0, silver: 0, copper: 0 }, enabledSlots: [] };
     
-    // Si no hay slots, crear 4x4 por defecto para el dueño
-    if (!inv.enabledSlots || inv.enabledSlots.length === 0) {
-        inv.enabledSlots = [];
-        for(let y=0; y<4; y++) for(let x=0; x<4; x++) inv.enabledSlots.push(`${x},${y}`);
-    }
+    // Inicializar monedas si no existen
+    const coins = inv.coins || { gold: 0, silver: 0, copper: 0 };
+
+    const goldInput = document.getElementById('coin-gold');
+    const silverInput = document.getElementById('coin-silver');
+    const copperInput = document.getElementById('coin-copper');
+
+    [goldInput, silverInput, copperInput].forEach(input => {
+        if (!input) return;
+        input.disabled = (myRole !== "GM");
+        const type = input.id.split('-')[1]; // gold, silver o copper
+        input.value = coins[type] || 0;
+        
+        input.onchange = (e) => {
+            if (myRole === "GM") {
+                updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
+            }
+        };
+    });
 
     const grid = document.getElementById('grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Dibujar 80 celdas
+    const slots = inv.enabledSlots || [];
     for (let y = 0; y < 10; y++) {
         for (let x = 0; x < 8; x++) {
             const slot = document.createElement('div');
-            const isEnabled = inv.enabledSlots.includes(`${x},${y}`);
+            const isEnabled = slots.includes(`${x},${y}`);
             slot.className = `slot ${isEnabled ? '' : 'locked'}`;
-            if (myRole === "GM") {
-                slot.onclick = () => toggleSlot(x, y);
-            }
+            if (myRole === "GM") slot.onclick = () => toggleSlot(x, y);
             grid.appendChild(slot);
         }
     }
 
-    // Dibujar Items
     const cellSize = 40;
-    const items = inv.items || [];
-    items.forEach(item => {
+    (inv.items || []).forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
         const w = item.rotated ? item.h : item.w;
@@ -89,8 +99,21 @@ function render(data) {
         el.innerText = item.name;
         grid.appendChild(el);
     });
+}
 
-    document.getElementById('coin-count').value = inv.coins || 0;
+async function updateCurrency(playerId, type, amount) {
+    const metadata = await OBR.scene.getMetadata();
+    const data = JSON.parse(JSON.stringify(metadata[METADATA_KEY] || { inventories: {} }));
+    
+    if (!data.inventories[playerId]) {
+        data.inventories[playerId] = { items: [], coins: { gold: 0, silver: 0, copper: 0 }, enabledSlots: [] };
+    }
+    if (!data.inventories[playerId].coins) {
+        data.inventories[playerId].coins = { gold: 0, silver: 0, copper: 0 };
+    }
+
+    data.inventories[playerId].coins[type] = amount;
+    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 }
 
 async function toggleSlot(x, y) {
