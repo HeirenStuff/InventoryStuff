@@ -1,37 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
+    <meta charset="UTF-8">
+    <!-- Usamos la versión específica del SDK para evitar fallos de carga -->
+    <script src="https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js"></script>
 </head>
-<body style="background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+<body style="background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding: 20px;">
     
-    <h1 id="status">Esperando SDK...</h1>
-    <p id="debug">Estado: Iniciando</p>
+    <h1 id="status" style="color: #d4af37;">ESTADO: Iniciando...</h1>
+    <div id="debug-box" style="background: #000; padding: 15px; border-radius: 5px; text-align: left; font-family: monospace; font-size: 12px;">
+        <p id="step-1">○ Esperando SDK...</p>
+        <p id="step-2">○ Intentando Handshake (onReady)...</p>
+        <p id="step-3">○ Obteniendo datos del jugador...</p>
+    </div>
 
     <script>
-        // Log para ver en consola si el script arranca
-        console.log("APP: Script de detección iniciado");
-        document.getElementById("debug").innerText = "Estado: Script cargado, esperando a Owlbear...";
+        const statusH1 = document.getElementById("status");
+        const step1 = document.getElementById("step-1");
+        const step2 = document.getElementById("step-2");
+        const step3 = document.getElementById("step-3");
 
-        OBR.onReady(async () => {
-            console.log("APP: OBR.onReady ejecutado");
-            try {
-                const name = await OBR.player.getName();
-                const role = await OBR.player.getRole();
-                const id = await OBR.player.getId();
+        console.log("DIAGNOSIS: Script ejecutándose");
 
-                document.getElementById("status").innerText = "¡CONECTADO!";
-                document.getElementById("debug").innerHTML = `
-                    Nombre: ${name} <br>
-                    Rol: <b>${role}</b> <br>
-                    ID: ${id}
-                `;
-                console.log("APP: Datos recibidos", {name, role, id});
-            } catch (err) {
-                console.error("APP: Error obteniendo datos", err);
-                document.getElementById("debug").innerText = "Error al obtener datos del jugador";
-            }
-        });
+        // 1. Comprobar si la librería cargó
+        if (typeof OBR === 'undefined') {
+            statusH1.innerText = "ERROR: SDK NO CARGADO";
+            step1.innerText = "✖ Error: No se pudo descargar la librería de unpkg.";
+            step1.style.color = "red";
+        } else {
+            step1.innerText = "✔ Librería SDK detectada correctamente.";
+            step1.style.color = "lightgreen";
+
+            // 2. Temporizador de seguridad (si en 5 seg no conecta, es el protocolo)
+            const timeout = setTimeout(() => {
+                if (statusH1.innerText === "ESTADO: Iniciando...") {
+                    statusH1.innerText = "ERROR DE CONEXIÓN";
+                    step2.innerHTML = "✖ El Handshake falló. <br><br><b>CAUSA PROBABLE:</b><br>- Estás abriendo el archivo localmente (file://).<br>- Debes usar un servidor local (http://localhost:5500).";
+                    step2.style.color = "orange";
+                }
+            }, 5000);
+
+            // 3. Intentar conexión oficial
+            OBR.onReady(async () => {
+                clearTimeout(timeout);
+                console.log("DIAGNOSIS: onReady ejecutado con éxito");
+                step2.innerText = "✔ Handshake completado con Owlbear Rodeo.";
+                step2.style.color = "lightgreen";
+
+                try {
+                    const name = await OBR.player.getName();
+                    const role = await OBR.player.getRole();
+                    const id = await OBR.player.getId();
+
+                    statusH1.innerText = "¡CONECTADO!";
+                    step3.innerHTML = `✔ Datos recibidos:<br> > NOMBRE: ${name}<br> > ROL: ${role}<br> > ID: ${id}`;
+                    step3.style.color = "lightgreen";
+                    
+                    document.body.style.border = role === "GM" ? "4px solid #d4af37" : "4px solid #00ff00";
+                } catch (e) {
+                    step3.innerText = "✖ Error al pedir datos: " + e.message;
+                    step3.style.color = "red";
+                }
+            });
+        }
     </script>
 </body>
 </html>
