@@ -1,14 +1,13 @@
 {
+    "manifest_version": 1,
     "name": "HB Inventory System",
     "version": "1.0.1",
-    "manifest_version": 1,
-    "description": "Inventario personalizado para",
-    "icon": "./icon.png",
+    "description": "Inventario para mua",
     "action": {
-      "title": "Inventory Stuff",
-      "icon": "./icon.png",
-      "popover": "./index.html",
-      "width": 380,
-      "height": 650
+        "title": "Inventory Stuff",
+        "icon": "icon.png",
+        "popover": "index.html",
+        "width": 380,
+        "height": 650
     }
-  }
+}
