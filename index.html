@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Cargamos el SDK primero en el head -->
     <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -11,9 +10,14 @@
         <div id="role-badge">Detectando...</div>
         <div class="coin-container"><h2 id="owner-name">INVENTARIO</h2></div>
 
+        <!-- Consola DM Actualizada -->
         <div id="gm-console" class="hidden">
             <select id="player-selector"></select>
-            <button id="btn-add">+ OTORGAR ITEM</button>
+            <div class="gm-controls">
+                <select id="item-catalog-selector"></select>
+                <button id="btn-add">OTORGAR</button>
+            </div>
+            <p class="gm-hint">Click Izq: Bloquear Slot | Click Der: Borrar Ítem</p>
         </div>
         
         <div class="currency-container">
@@ -21,9 +25,11 @@
             <div class="currency-field"><span>PP:</span><input type="number" id="coin-silver"></div>
             <div class="currency-field"><span>PC:</span><input type="number" id="coin-copper"></div>
         </div>
-        <div id="grid" class="inventory-grid"></div>
+
+        <div id="grid-container">
+            <div id="grid" class="inventory-grid"></div>
+        </div>
     </div>
-    <!-- Script de lógica al final sin type="module" -->
     <script src="./script.js"></script>
 </body>
 </html>

@@ -1,28 +1,22 @@
 const METADATA_KEY = "com.heirenstuff.inventory/data";
 let myId, myRole, viewedPlayerId;
 
-// Función de inicio robusta
-async function init() {
-    if (typeof OBR === 'undefined') {
-        setTimeout(init, 100); // Reintentar si el SDK no cargó
-        return;
-    }
+// --- FASE 1: CATÁLOGO DE OBJETOS ---
+const ITEM_CATALOG = [
+    { id: "pistol", name: "Pistola 9mm", img: "https://i.ibb.co/LzNfG9m/pistol.png", w: 2, h: 2 },
+    { id: "herb-g", name: "Hierba Verde", img: "https://i.ibb.co/0M7V4y2/herb.png", w: 1, h: 1 },
+    { id: "shotgun", name: "Escopeta", img: "https://i.ibb.co/vYm6X0p/shotgun.png", w: 3, h: 1 },
+    { id: "knife", name: "Cuchillo", img: "https://i.ibb.co/9V5LzD8/knife.png", w: 1, h: 2 }
+];
 
+async function init() {
     OBR.onReady(async () => {
         myId = await OBR.player.getId();
         myRole = await OBR.player.getRole();
         viewedPlayerId = myId;
 
-        const badge = document.getElementById('role-badge');
-        badge.innerText = `MODO: ${myRole}`;
-        badge.style.color = myRole === "GM" ? "#cc9a49" : "#aaa";
-
-        if (myRole === "GM") {
-            document.getElementById('gm-console').classList.remove('hidden');
-            setupDMView();
-            setupGMEvents();
-        }
-
+        setupUI();
+        
         OBR.scene.onMetadataChange((metadata) => {
             render(metadata[METADATA_KEY] || { inventories: {} });
         });
@@ -32,13 +26,31 @@ async function init() {
     });
 }
 
-function setupGMEvents() {
+function setupUI() {
+    const badge = document.getElementById('role-badge');
+    badge.innerText = `MODO: ${myRole}`;
+    
+    if (myRole === "GM") {
+        document.getElementById('gm-console').classList.remove('hidden');
+        setupDMView();
+        
+        // Cargar Catálogo en el select
+        const catSelector = document.getElementById('item-catalog-selector');
+        ITEM_CATALOG.forEach(item => {
+            let opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = `${item.name} (${item.w}x${item.h})`;
+            catSelector.appendChild(opt);
+        });
+
+        document.getElementById('btn-add').onclick = addNewItem;
+    }
+
     ['gold', 'silver', 'copper'].forEach(type => {
         document.getElementById(`coin-${type}`).onchange = (e) => {
             updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
         };
     });
-    document.getElementById('btn-add').onclick = addNewItem;
 }
 
 async function setupDMView() {
@@ -59,6 +71,7 @@ async function setupDMView() {
     updateList();
 }
 
+// --- RENDERIZADO (FASE 1) ---
 function render(data) {
     const inv = (data.inventories || {})[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
     const coins = inv.coins || { gold: 0, silver: 0, copper: 0 };
@@ -71,37 +84,86 @@ function render(data) {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
 
+    // Crear Slots
     for (let y = 0; y < 10; y++) {
         for (let x = 0; x < 8; x++) {
             const slot = document.createElement('div');
             const isEnabled = enabledSlots.includes(`${x},${y}`);
             slot.className = `slot ${isEnabled ? '' : 'locked'}`;
-            if (myRole === "GM") slot.onclick = () => toggleSlot(x, y);
+            
+            if (myRole === "GM") {
+                slot.onclick = () => toggleSlot(x, y);
+            }
             grid.appendChild(slot);
         }
     }
 
+    // Dibujar Ítems (Fase 1: Imágenes)
     (inv.items || []).forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
-        const w = item.rotated ? item.h : item.w;
-        const h = item.rotated ? item.w : item.h;
-        el.style.width = `${w * 40}px`;
-        el.style.height = `${h * 40}px`;
+        const actualW = item.rotated ? item.h : item.w;
+        const actualH = item.rotated ? item.w : item.h;
+        
+        el.style.width = `${actualW * 40 + (actualW-1)}px`;
+        el.style.height = `${actualH * 40 + (actualH-1)}px`;
         el.style.left = `${item.x * 41}px`;
         el.style.top = `${item.y * 41}px`;
-        el.innerText = item.name;
+
+        // Imagen del ítem
+        el.innerHTML = `<img src="${item.img}" title="${item.name}">`;
+
+        // FASE 3: Rotación y Borrado
+        el.oncontextmenu = (e) => {
+            e.preventDefault();
+            if (myRole === "GM") removeItem(item.id);
+        };
+        
+        el.onclick = (e) => {
+            if (e.shiftKey) rotateItem(item.id);
+        };
+
         grid.appendChild(el);
     });
 }
 
-async function updateCurrency(playerId, type, amount) {
+// --- LÓGICA DE DATOS ---
+
+async function addNewItem() {
+    const catalogId = document.getElementById('item-catalog-selector').value;
+    const template = ITEM_CATALOG.find(i => i.id === catalogId);
+    
     const meta = await OBR.scene.getMetadata();
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
-    if (!data.inventories[playerId]) data.inventories[playerId] = { items: [], coins: {}, enabledSlots: [] };
-    if (!data.inventories[playerId].coins) data.inventories[playerId].coins = {};
-    data.inventories[playerId].coins[type] = amount;
+    if (!data.inventories[viewedPlayerId]) data.inventories[viewedPlayerId] = { items: [], coins: {}, enabledSlots: [] };
+    
+    const newItem = {
+        ...template,
+        id: crypto.randomUUID(),
+        x: 0, y: 0,
+        rotated: false
+    };
+
+    data.inventories[viewedPlayerId].items.push(newItem);
     await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+}
+
+async function removeItem(itemId) {
+    const meta = await OBR.scene.getMetadata();
+    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
+    const inv = data.inventories[viewedPlayerId];
+    inv.items = inv.items.filter(i => i.id !== itemId);
+    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+}
+
+async function rotateItem(itemId) {
+    const meta = await OBR.scene.getMetadata();
+    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
+    const item = data.inventories[viewedPlayerId].items.find(i => i.id === itemId);
+    if(item) {
+        item.rotated = !item.rotated;
+        await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+    }
 }
 
 async function toggleSlot(x, y) {
@@ -116,16 +178,13 @@ async function toggleSlot(x, y) {
     await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 }
 
-async function addNewItem() {
+async function updateCurrency(playerId, type, amount) {
     const meta = await OBR.scene.getMetadata();
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
-    const inv = data.inventories[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
-    if (!inv.enabledSlots || inv.enabledSlots.length === 0) return;
-    const [x, y] = inv.enabledSlots[0].split(',');
-    inv.items.push({ id: crypto.randomUUID(), name: "NUEVO", x: parseInt(x), y: parseInt(y), w: 1, h: 1, rotated: false });
-    data.inventories[viewedPlayerId] = inv;
+    if (!data.inventories[playerId]) data.inventories[playerId] = { items: [], coins: {}, enabledSlots: [] };
+    if (!data.inventories[playerId].coins) data.inventories[playerId].coins = {};
+    data.inventories[playerId].coins[type] = amount;
     await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 }
 
-// Arrancamos la inicialización
 init();

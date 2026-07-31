@@ -1,172 +1,78 @@
-/* 1. RESET Y COLORES BASE */
 :root {
-    --bg-dark: #0c0c0c;
-    --panel-bg: #1a1a1a;
-    --accent-gold: #cc9a49;
-    --border-color: #3d3d3d;
-    --slot-locked: #050505;
-    --slot-enabled: #1a1a1a;
+    --bg-dark: #0a0a0a;
+    --panel-bg: #151515;
+    --accent-gold: #d4af37;
+    --item-bg: rgba(212, 175, 55, 0.15);
+    --border-color: #444;
 }
 
-html, body {
-    background-color: var(--bg-dark) !important;
-    color: var(--accent-gold) !important;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    margin: 0;
+body {
+    background-color: var(--bg-dark);
+    color: var(--accent-gold);
+    font-family: 'Courier New', Courier, monospace; /* Fuente retro */
+    width: 360px;
     padding: 10px;
-    width: 350px; /* Ancho optimizado para el popover */
-    overflow-x: hidden;
+    user-select: none;
 }
 
-/* 2. CONTENEDORES SUPERIORES */
-.coin-container {
-    background: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-h2 {
-    margin: 0;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-input, select {
-    background: #2a2a2a !important;
-    border: 1px solid var(--accent-gold) !important;
-    color: var(--accent-gold) !important;
-    padding: 4px;
-    border-radius: 2px;
-}
-
-/* 3. GRID DE INVENTARIO (RESIDENT EVIL) */
+/* El grid ahora tiene el tamaño exacto */
 .inventory-grid {
-    display: grid !important;
+    display: grid;
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: #444; /* Líneas más claras */
-    width: 328px;
-    height: 409px;
-    margin: 10px auto;
+    background-color: #222;
+    width: 327px;
     border: 2px solid var(--accent-gold);
     position: relative;
-    overflow: hidden;
 }
 
 .slot {
     width: 40px;
     height: 40px;
-    background-color: #1a1a1a;
-    cursor: pointer;
+    background-color: #111;
 }
 
 .slot.locked {
-    background-color: #050505;
-    background-image: repeating-linear-gradient(45deg, #000, #000 2px, transparent 2px, transparent 4px);
+    background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent 100%);
+    background-size: 4px 4px;
 }
 
-.slot:hover {
-    background-color: #252525;
-}
-
-/* 4. ITEMS */
 .item {
     position: absolute;
-    background: rgba(204, 154, 73, 0.3);
+    background: var(--item-bg);
     border: 1px solid var(--accent-gold);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    font-weight: bold;
-    text-align: center;
-    pointer-events: none; /* Permite hacer clic en los slots debajo */
     box-sizing: border-box;
-    text-shadow: 1px 1px 2px black;
-    z-index: 10;
-}
-
-/* 5. BOTONES Y UTILIDADES */
-button {
-    background: var(--accent-gold) !important;
-    color: black !important;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    font-weight: bold;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 5px;
-    transition: opacity 0.2s;
-}
-
-button:hover {
-    opacity: 0.8;
-}
-
-.hidden {
-    display: none !important;
-}
-
-#player-selector {
-    width: 100%;
-    margin-top: 5px;
-}
-
-/*Monedas*/
-.currency-container {
-    background: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    padding: 5px;
-    margin-bottom: 10px;
+    z-index: 100;
+    cursor: grab;
     display: flex;
-    gap: 8px;
-    justify-content: space-between;
-}
-
-.currency-field {
-    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 4px;
-    flex: 1;
+    overflow: hidden;
 }
 
-.currency-field span {
-    font-size: 11px;
-    font-weight: bold;
-    color: var(--accent-gold);
+.item img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    pointer-events: none;
 }
 
-.currency-field input {
-    width: 100%;
-    min-width: 0; /* Evita que el input desborde el flex */
-    padding: 2px !important;
-    font-size: 12px;
+.gm-controls {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
 }
 
-/*GM COsa*/
-
-#role-badge {
+.gm-hint {
     font-size: 9px;
-    text-align: center;
-    padding: 2px;
-    background: #333;
     color: #888;
-    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
-#gm-console {
-    background: #222;
-    padding: 10px;
-    border: 1px dashed var(--accent-gold);
-    margin-bottom: 10px;
+input[type="number"] {
+    width: 40px;
+    background: #000;
+    color: #0f0; /* Estilo terminal verde */
+    border: 1px solid #333;
 }
-
-#gm-console select { width: 100%; margin-bottom: 5px; }
