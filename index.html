@@ -2,28 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div id="app">
-        <div id="role-badge">Detectando...</div>
-        <div class="coin-container"><h2 id="owner-name">INVENTARIO</h2></div>
+        <div id="role-badge">INICIANDO...</div>
+        
+        <div class="coin-container">
+            <h2 id="owner-name">MI INVENTARIO</h2>
+        </div>
 
-        <!-- Consola DM Actualizada -->
+        <!-- Consola DM -->
         <div id="gm-console" class="hidden">
+            <label style="font-size: 10px;">VER JUGADOR:</label>
             <select id="player-selector"></select>
+            
             <div class="gm-controls">
                 <select id="item-catalog-selector"></select>
                 <button id="btn-add">OTORGAR</button>
             </div>
-            <p class="gm-hint">Click Izq: Bloquear Slot | Click Der: Borrar Ítem</p>
+            <p class="gm-hint">Click: Bloquear Slot | Click Der: Borrar Ítem</p>
         </div>
         
+        <!-- Monedas en Horizontal -->
         <div class="currency-container">
-            <div class="currency-field"><span>PO:</span><input type="number" id="coin-gold"></div>
-            <div class="currency-field"><span>PP:</span><input type="number" id="coin-silver"></div>
-            <div class="currency-field"><span>PC:</span><input type="number" id="coin-copper"></div>
+            <div class="currency-field"><span>PO</span><input type="number" id="coin-gold" value="0"></div>
+            <div class="currency-field"><span>PP</span><input type="number" id="coin-silver" value="0"></div>
+            <div class="currency-field"><span>PC</span><input type="number" id="coin-copper" value="0"></div>
         </div>
 
         <div id="grid-container">

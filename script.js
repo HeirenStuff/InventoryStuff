@@ -1,7 +1,6 @@
 const METADATA_KEY = "com.heirenstuff.inventory/data";
 let myId, myRole, viewedPlayerId;
 
-// --- FASE 1: CATÁLOGO DE OBJETOS ---
 const ITEM_CATALOG = [
     { id: "pistol", name: "Pistola 9mm", img: "https://i.ibb.co/LzNfG9m/pistol.png", w: 2, h: 2 },
     { id: "herb-g", name: "Hierba Verde", img: "https://i.ibb.co/0M7V4y2/herb.png", w: 1, h: 1 },
@@ -9,69 +8,35 @@ const ITEM_CATALOG = [
     { id: "knife", name: "Cuchillo", img: "https://i.ibb.co/9V5LzD8/knife.png", w: 1, h: 2 }
 ];
 
-const METADATA_KEY = "com.heirenstuff.inventory/data";
-let myId, myRole, viewedPlayerId;
+OBR.onReady(async () => {
+    myId = await OBR.player.getId();
+    myRole = await OBR.player.getRole();
+    viewedPlayerId = myId;
 
-async function init() {
-    // OBR.onReady es la forma correcta de esperar al SDK
-    OBR.onReady(async () => {
-        try {
-            myId = await OBR.player.getId();
-            myRole = await OBR.player.getRole();
-            viewedPlayerId = myId;
-
-            // Configurar UI básica
-            const badge = document.getElementById('role-badge');
-            if (badge) {
-                badge.innerText = `MODO: ${myRole}`;
-                badge.style.color = myRole === "GM" ? "#cc9a49" : "#aaa";
-            }
-
-            if (myRole === "GM") {
-                const consoleDiv = document.getElementById('gm-console');
-                if (consoleDiv) consoleDiv.classList.remove('hidden');
-                setupDMView();
-                setupGMEvents();
-            }
-
-            // Suscribirse a cambios
-            OBR.scene.onMetadataChange((metadata) => {
-                render(metadata[METADATA_KEY] || { inventories: {} });
-            });
-
-            // Render inicial
-            const metadata = await OBR.scene.getMetadata();
-            render(metadata[METADATA_KEY] || { inventories: {} });
-            
-        } catch (error) {
-            console.error("Error al conectar con Owlbear:", error);
-        }
+    setupUI();
+    
+    // Suscribirse a cambios en la escena
+    OBR.scene.onMetadataChange((metadata) => {
+        const data = metadata[METADATA_KEY] || { inventories: {} };
+        render(data);
     });
-}
 
-// Ejecutar init al cargar el script
-init();
+    // Render inicial
+    const initialMeta = await OBR.scene.getMetadata();
+    render(initialMeta[METADATA_KEY] || { inventories: {} });
+});
 
 function setupUI() {
     const badge = document.getElementById('role-badge');
     badge.innerText = `MODO: ${myRole}`;
-    
+    badge.style.color = myRole === "GM" ? "#d4af37" : "#0f0";
+
     if (myRole === "GM") {
         document.getElementById('gm-console').classList.remove('hidden');
-        setupDMView();
-        
-        // Cargar Catálogo en el select
-        const catSelector = document.getElementById('item-catalog-selector');
-        ITEM_CATALOG.forEach(item => {
-            let opt = document.createElement('option');
-            opt.value = item.id;
-            opt.innerText = `${item.name} (${item.w}x${item.h})`;
-            catSelector.appendChild(opt);
-        });
-
-        document.getElementById('btn-add').onclick = addNewItem;
+        setupDMFunctions();
     }
 
+    // Eventos de monedas
     ['gold', 'silver', 'copper'].forEach(type => {
         document.getElementById(`coin-${type}`).onchange = (e) => {
             updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
@@ -79,30 +44,55 @@ function setupUI() {
     });
 }
 
-async function setupDMView() {
+async function setupDMFunctions() {
     const selector = document.getElementById('player-selector');
-    const updateList = async () => {
+    const catSelector = document.getElementById('item-catalog-selector');
+
+    // Poblar catálogo de items
+    ITEM_CATALOG.forEach(item => {
+        let opt = document.createElement('option');
+        opt.value = item.id;
+        opt.innerText = `${item.name} (${item.w}x${item.h})`;
+        catSelector.appendChild(opt);
+    });
+
+    // Función para actualizar lista de jugadores
+    const updatePlayerList = async () => {
         const players = await OBR.party.getPlayers();
         const myName = await OBR.player.getName();
+        
         let options = `<option value="${myId}">${myName} (Tú)</option>`;
-        players.forEach(p => options += `<option value="${p.id}">${p.name}</option>`);
+        players.forEach(p => {
+            options += `<option value="${p.id}">${p.name}</option>`;
+        });
         selector.innerHTML = options;
+        selector.value = viewedPlayerId;
     };
+
     selector.onchange = (e) => {
         viewedPlayerId = e.target.value;
-        document.getElementById('owner-name').innerText = `INV: ${e.target.options[e.target.selectedIndex].text}`;
-        OBR.scene.getMetadata().then(meta => render(meta[METADATA_KEY] || { inventories: {} }));
+        const selectedName = selector.options[selector.selectedIndex].text;
+        document.getElementById('owner-name').innerText = `INV: ${selectedName.toUpperCase()}`;
+        refreshRender();
     };
-    OBR.party.onChange(updateList);
-    updateList();
+
+    document.getElementById('btn-add').onclick = addNewItem;
+
+    OBR.party.onChange(updatePlayerList);
+    updatePlayerList();
 }
 
-// --- RENDERIZADO (FASE 1) ---
-function render(data) {
-    const inv = (data.inventories || {})[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
-    const coins = inv.coins || { gold: 0, silver: 0, copper: 0 };
-    const enabledSlots = inv.enabledSlots || [];
+async function refreshRender() {
+    const meta = await OBR.scene.getMetadata();
+    render(meta[METADATA_KEY] || { inventories: {} });
+}
 
+function render(data) {
+    const inventories = data.inventories || {};
+    const inv = inventories[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
+    
+    // Actualizar Monedas
+    const coins = inv.coins || { gold: 0, silver: 0, copper: 0 };
     document.getElementById('coin-gold').value = coins.gold || 0;
     document.getElementById('coin-silver').value = coins.silver || 0;
     document.getElementById('coin-copper').value = coins.copper || 0;
@@ -110,7 +100,8 @@ function render(data) {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
 
-    // Crear Slots
+    // Crear 80 slots (8x10)
+    const enabledSlots = inv.enabledSlots || [];
     for (let y = 0; y < 10; y++) {
         for (let x = 0; x < 8; x++) {
             const slot = document.createElement('div');
@@ -124,22 +115,21 @@ function render(data) {
         }
     }
 
-    // Dibujar Ítems (Fase 1: Imágenes)
+    // Dibujar Ítems
     (inv.items || []).forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
         const actualW = item.rotated ? item.h : item.w;
         const actualH = item.rotated ? item.w : item.h;
         
-        el.style.width = `${actualW * 40 + (actualW-1)}px`;
-        el.style.height = `${actualH * 40 + (actualH-1)}px`;
+        el.style.width = `${actualW * 40 + (actualW - 1)}px`;
+        el.style.height = `${actualH * 40 + (actualH - 1)}px`;
         el.style.left = `${item.x * 41}px`;
         el.style.top = `${item.y * 41}px`;
 
-        // Imagen del ítem
         el.innerHTML = `<img src="${item.img}" title="${item.name}">`;
 
-        // FASE 3: Rotación y Borrado
+        // Acciones de item
         el.oncontextmenu = (e) => {
             e.preventDefault();
             if (myRole === "GM") removeItem(item.id);
@@ -154,6 +144,32 @@ function render(data) {
 }
 
 // --- LÓGICA DE DATOS ---
+
+async function updateCurrency(playerId, type, amount) {
+    const meta = await OBR.scene.getMetadata();
+    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
+    if (!data.inventories[playerId]) data.inventories[playerId] = { items: [], coins: {}, enabledSlots: [] };
+    if (!data.inventories[playerId].coins) data.inventories[playerId].coins = {};
+    
+    data.inventories[playerId].coins[type] = amount;
+    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+}
+
+async function toggleSlot(x, y) {
+    const meta = await OBR.scene.getMetadata();
+    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
+    if (!data.inventories[viewedPlayerId]) data.inventories[viewedPlayerId] = { items: [], coins: {}, enabledSlots: [] };
+    
+    const slots = data.inventories[viewedPlayerId].enabledSlots || [];
+    const key = `${x},${y}`;
+    const idx = slots.indexOf(key);
+    
+    if (idx > -1) slots.splice(idx, 1);
+    else slots.push(key);
+    
+    data.inventories[viewedPlayerId].enabledSlots = slots;
+    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+}
 
 async function addNewItem() {
     const catalogId = document.getElementById('item-catalog-selector').value;
@@ -178,39 +194,19 @@ async function removeItem(itemId) {
     const meta = await OBR.scene.getMetadata();
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
     const inv = data.inventories[viewedPlayerId];
-    inv.items = inv.items.filter(i => i.id !== itemId);
-    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+    if (inv) {
+        inv.items = inv.items.filter(i => i.id !== itemId);
+        await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+    }
 }
 
 async function rotateItem(itemId) {
     const meta = await OBR.scene.getMetadata();
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
-    const item = data.inventories[viewedPlayerId].items.find(i => i.id === itemId);
+    const inv = data.inventories[viewedPlayerId];
+    const item = inv?.items.find(i => i.id === itemId);
     if(item) {
         item.rotated = !item.rotated;
         await OBR.scene.setMetadata({ [METADATA_KEY]: data });
     }
 }
-
-async function toggleSlot(x, y) {
-    const meta = await OBR.scene.getMetadata();
-    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
-    if (!data.inventories[viewedPlayerId]) data.inventories[viewedPlayerId] = { items: [], coins: {}, enabledSlots: [] };
-    const slots = data.inventories[viewedPlayerId].enabledSlots || [];
-    const key = `${x},${y}`;
-    const idx = slots.indexOf(key);
-    idx > -1 ? slots.splice(idx, 1) : slots.push(key);
-    data.inventories[viewedPlayerId].enabledSlots = slots;
-    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
-}
-
-async function updateCurrency(playerId, type, amount) {
-    const meta = await OBR.scene.getMetadata();
-    const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
-    if (!data.inventories[playerId]) data.inventories[playerId] = { items: [], coins: {}, enabledSlots: [] };
-    if (!data.inventories[playerId].coins) data.inventories[playerId].coins = {};
-    data.inventories[playerId].coins[type] = amount;
-    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
-}
-
-init();

@@ -1,30 +1,79 @@
 :root {
     --bg-dark: #0a0a0a;
-    --panel-bg: #151515;
+    --panel-bg: #1a1a1a;
     --accent-gold: #d4af37;
-    --item-bg: rgba(212, 175, 55, 0.15);
+    --item-bg: rgba(212, 175, 55, 0.1);
     --border-color: #444;
+    --text-green: #0f0;
 }
 
 body {
     background-color: var(--bg-dark);
     color: var(--accent-gold);
-    font-family: 'Courier New', Courier, monospace; /* Fuente retro */
-    width: 360px;
+    font-family: 'Courier New', Courier, monospace;
+    width: 350px;
     padding: 10px;
     user-select: none;
+    margin: 0;
 }
 
-/* El grid ahora tiene el tamaño exacto */
+.hidden { display: none !important; }
+
+#role-badge {
+    font-size: 10px;
+    text-align: right;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.coin-container h2 {
+    margin: 5px 0;
+    font-size: 18px;
+    border-bottom: 1px solid var(--accent-gold);
+}
+
+/* MONEDAS EN HORIZONTAL */
+.currency-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+    background: #151515;
+    padding: 8px;
+    border: 1px solid #333;
+}
+
+.currency-field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.currency-field span {
+    font-weight: bold;
+    font-size: 12px;
+}
+
+input[type="number"] {
+    width: 45px;
+    background: #000;
+    color: var(--text-green);
+    border: 1px solid var(--accent-gold);
+    padding: 2px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* GRID */
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: #222;
-    width: 327px;
+    background-color: #333;
+    width: 327px; /* 8 * 40px + gaps */
     border: 2px solid var(--accent-gold);
     position: relative;
+    margin: 0 auto;
 }
 
 .slot {
@@ -34,8 +83,7 @@ body {
 }
 
 .slot.locked {
-    background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent 100%);
-    background-size: 4px 4px;
+    background-image: repeating-linear-gradient(45deg, #000, #000 2px, #222 2px, #222 4px);
 }
 
 .item {
@@ -48,31 +96,39 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
 .item img {
     max-width: 90%;
     max-height: 90%;
-    object-fit: contain;
     pointer-events: none;
 }
 
+/* GM CONSOLE */
+#gm-console {
+    background: #222;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #d4af37;
+}
+
 .gm-controls {
+    margin-top: 10px;
     display: flex;
+    flex-wrap: wrap;
     gap: 5px;
-    margin-top: 5px;
+}
+
+select, button {
+    background: #000;
+    color: #fff;
+    border: 1px solid var(--accent-gold);
+    padding: 3px;
+    font-family: sans-serif;
 }
 
 .gm-hint {
     font-size: 9px;
-    color: #888;
+    color: #aaa;
     margin-top: 5px;
-}
-
-input[type="number"] {
-    width: 40px;
-    background: #000;
-    color: #0f0; /* Estilo terminal verde */
-    border: 1px solid #333;
 }
