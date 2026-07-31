@@ -1,101 +1,122 @@
+/* 1. RESET Y COLORES BASE */
 :root {
-    --bg-color: #0c0c0c;
-    --panel-color: #1a1a1a;
-    --accent-color: #cc9a49; /* El dorado de tu imagen */
-    --text-color: #e0e0e0;
-    --border-style: 1px solid #3d3d3d;
+    --bg-dark: #0c0c0c;
+    --panel-bg: #1a1a1a;
+    --accent-gold: #cc9a49;
+    --border-color: #3d3d3d;
+    --slot-locked: #050505;
+    --slot-enabled: #1a1a1a;
 }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+html, body {
+    background-color: var(--bg-dark) !important;
+    color: var(--accent-gold) !important;
+    font-family: 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 10px;
-    user-select: none;
+    width: 350px; /* Ancho optimizado para el popover */
+    overflow-x: hidden;
 }
 
-h2 {
-    color: var(--accent-color);
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: var(--border-style);
-    padding-bottom: 5px;
-    margin-top: 0;
-}
-
-/* Contenedores */
-.coin-container, #header {
-    background: var(--panel-color);
+/* 2. CONTENEDORES SUPERIORES */
+.coin-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
     padding: 10px;
-    border: var(--border-style);
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Inputs y Selects */
-input, select, button {
-    background: #2a2a2a;
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    padding: 5px;
-    border-radius: 3px;
-    outline: none;
+h2 {
+    margin: 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-button:hover {
-    background: var(--accent-color);
-    color: black;
-    cursor: pointer;
+input, select {
+    background: #2a2a2a !important;
+    border: 1px solid var(--accent-gold) !important;
+    color: var(--accent-gold) !important;
+    padding: 4px;
+    border-radius: 2px;
 }
 
-/* Grid de Resident Evil */
+/* 3. GRID DE INVENTARIO (RESIDENT EVIL) */
 .inventory-grid {
     display: grid !important;
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: #333;
-    width: 328px; /* 8 * 40px + gaps */
+    background-color: var(--border-color);
+    width: 328px; /* (8 * 40px) + (8 * 1px gap) */
     height: 409px;
     margin: 0 auto;
-    border: 2px solid #cc9a49;
-    overflow: hidden;
+    border: 2px solid var(--accent-gold);
+    position: relative; /* Necesario para posicionar ítems absolute */
 }
 
 .slot {
     width: 40px;
     height: 40px;
-    background-color: #050505;
+    background-color: var(--slot-enabled);
     cursor: pointer;
+    box-sizing: border-box;
+}
+
+.slot:hover {
+    background-color: #252525;
 }
 
 .slot.locked {
-    background-color: #111;
-    background-image: repeating-linear-gradient(45deg, #000, #000 2px, #111 2px, #111 4px);
+    background-color: var(--slot-locked);
+    background-image: radial-gradient(var(--border-color) 1px, transparent 0);
+    background-size: 8px 8px; /* Efecto de zona bloqueada */
 }
 
-/* Items */
+/* 4. ITEMS */
 .item {
     position: absolute;
-    background: rgba(204, 154, 73, 0.15); /* Dorado translúcido */
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
+    background: rgba(204, 154, 73, 0.3);
+    border: 1px solid var(--accent-gold);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
     text-align: center;
+    pointer-events: none; /* Permite hacer clic en los slots debajo */
     box-sizing: border-box;
-    transition: background 0.2s;
+    text-shadow: 1px 1px 2px black;
+    z-index: 10;
 }
 
-.item:hover {
-    background: rgba(204, 154, 73, 0.3);
+/* 5. BOTONES Y UTILIDADES */
+button {
+    background: var(--accent-gold) !important;
+    color: black !important;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: opacity 0.2s;
 }
 
-.hidden { display: none; }
+button:hover {
+    opacity: 0.8;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#player-selector {
+    width: 100%;
+    margin-top: 5px;
+}

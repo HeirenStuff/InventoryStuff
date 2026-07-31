@@ -3,35 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RE Inventory</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div id="app">
-        <!-- Encabezado con Nombre y Selector de Jugadores para el DM -->
-        <div id="header">
+        <div id="header" class="coin-container">
             <h2 id="owner-name">MI INVENTARIO</h2>
-            <select id="player-selector" class="hidden"></select>
+            <select id="player-selector" style="display:none"></select>
         </div>
         
-        <!-- Contador de Monedas/Oro -->
         <div class="coin-container">
-            <span>TESORO (GOLD):</span>
+            <span>ORO:</span>
             <input type="number" id="coin-count" value="0">
         </div>
 
-        <!-- Cuadrícula del Inventario -->
-        <div id="grid" class="inventory-grid">
-            <!-- Los ítems se generan dinámicamente mediante script.js -->
-        </div>
+        <div id="grid" class="inventory-grid"></div>
 
-        <!-- Controles exclusivos para el DM -->
-        <div id="dm-controls" class="hidden" style="margin-top: 15px;">
-            <button id="add-item-btn" onclick="addNewItem()">+ Dar Item</button>
+        <div id="dm-controls" style="display:none; margin-top: 10px;">
+            <button onclick="addNewItem()">+ Dar item</button>
         </div>
     </div>
-
-    <!-- SDK de Owlbear Rodeo y Lógica Principal -->
     <script src="https://unpkg.com/@owlbear-rodeo/sdk/dist/obr.js"></script>
     <script src="./script.js" type="module"></script>
 </body>
