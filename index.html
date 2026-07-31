@@ -3,86 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OBR Debugger</title>
+  <title>OBR Info Fix</title>
   <style>
     body { font-family: sans-serif; color: white; background: #242424; margin: 0; padding: 10px; text-align: center; }
-    #info-card { background: #333; padding: 15px; border-radius: 8px; border: 1px solid #555; }
-    .status { font-size: 0.8em; color: #888; margin-top: 10px; border-top: 1px solid #444; padding-top: 5px; }
+    #info-card { background: #333; padding: 15px; border-radius: 8px; border: 2px dashed #555; }
+    .role { font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 5px; }
+    .gm { color: #bb86fc; }
+    .player { color: #03dac6; }
+    .status { font-size: 0.7em; color: #777; margin-top: 10px; }
   </style>
 </head>
 <body>
 
   <div id="info-card">
-    <div id="content">Iniciando SDK...</div>
-    <div id="status-log" class="status">Esperando conexión...</div>
+    <div id="content">Esperando SDK...</div>
+    <div id="debug-log" class="status">Cargando script...</div>
   </div>
 
-  <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
+  <!-- URL corregida para asegurar que cargue la versión de navegador (UMD) -->
+  <script src="https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js"></script>
 
   <script>
     const content = document.getElementById('content');
-    const statusLog = document.getElementById('status-log');
+    const debugLog = document.getElementById('debug-log');
 
     function log(msg) {
       console.log(`[OBR-DEBUG]: ${msg}`);
-      statusLog.innerText = msg;
+      debugLog.innerText = msg;
     }
 
-    console.log("[OBR-DEBUG]: Script cargado. Comprobando OBR...");
+    // Función principal
+    async function startExtension() {
+      log("Iniciando OBR.onReady...");
+      
+      OBR.onReady(async () => {
+        log("SDK conectada con Owlbear Rodeo.");
+        
+        const updateData = async () => {
+          try {
+            log("Obteniendo datos...");
+            const role = await OBR.player.getRole();
+            const name = await OBR.player.getName();
+            log(`Datos: ${role} - ${name}`);
 
-    if (typeof OBR === 'undefined') {
-      log("ERROR: SDK de OBR no encontrada.");
-      content.innerText = "Error: No se cargó la SDK";
-    }
-
-    // Comprobar si estamos en OBR
-    if (!OBR.isAvailable) {
-      log("Aviso: No estoy en una instancia de Owlbear.");
-    }
-
-    OBR.onReady(async () => {
-      log("SDK Lista (onReady disparado)");
-
-      async function updateInfo() {
-        try {
-          log("Pidiendo Rol...");
-          const role = await OBR.player.getRole();
-          log(`Rol recibido: ${role}`);
-
-          log("Pidiendo Nombre...");
-          const name = await OBR.player.getName();
-          log(`Nombre recibido: ${name}`);
-
-          if (role === "GM") {
-            content.innerHTML = `<b style="color: #bb86fc;">ERES EL DM (GM)</b>`;
-          } else {
-            content.innerHTML = `
-              <div style="color: #03dac6;">JUGADOR</div>
-              <div style="font-size: 1.2em;">${name}</div>
-            `;
+            if (role === "GM") {
+              content.innerHTML = `<span class="role gm">ERES EL DM</span>`;
+            } else {
+              content.innerHTML = `
+                <span class="role player">JUGADOR</span>
+                <div style="font-size: 1.3em;">${name}</div>
+              `;
+            }
+          } catch (e) {
+            log("Error obteniendo datos: " + e.message);
           }
-          log("Renderizado completado con éxito.");
-        } catch (error) {
-          console.error("[OBR-DEBUG] Error en updateInfo:", error);
-          log("Error obteniendo datos del jugador.");
-        }
-      }
+        };
 
-      // Primera ejecución
-      updateInfo();
-
-      // Suscribirse a cambios
-      OBR.player.onChange((player) => {
-        log("Cambio detectado en el jugador, actualizando...");
-        updateInfo();
+        // Ejecutar y suscribir
+        updateData();
+        OBR.player.onChange(updateData);
       });
-    });
+    }
 
-    // Timeout de seguridad por si onReady nunca se dispara
+    // Verificamos si la variable OBR existe cada 100ms hasta que cargue el script
+    const checkInterval = setInterval(() => {
+      log("Verificando si 'window.OBR' existe...");
+      if (typeof window.OBR !== 'undefined') {
+        log("¡OBR detectado!");
+        clearInterval(checkInterval);
+        startExtension();
+      }
+    }, 200);
+
+    // Timeout por si el script falla en cargar
     setTimeout(() => {
-      if (content.innerText === "Iniciando SDK...") {
-        log("ERROR: onReady tardó demasiado (¿estás fuera de OBR?)");
-        content.innerText = "Error de conexión con OBR";
+      if (typeof window.OBR === 'undefined') {
+        log("ERROR: El script de la SDK no cargó.");
+        content.innerText = "Error: SDK no disponible";
       }
     }, 5000);
   </script>
