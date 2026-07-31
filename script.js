@@ -7,21 +7,31 @@ OBR.onReady(async () => {
     myId = await OBR.player.getId();
     myRole = await OBR.player.getRole();
     viewedPlayerId = myId;
-    if (myRole === "GM") setupDMView();
-    OBR.scene.onMetadataChange((metadata) => render(metadata[METADATA_KEY] || { inventories: {} }));
+
+    if (myRole === "GM") {
+        document.getElementById('dm-controls').classList.remove('hidden');
+        document.getElementById('player-selector').classList.remove('hidden');
+        setupDMView();
+    }
+
+    // Carga inicial
+    const metadata = await OBR.scene.getMetadata();
+    render(metadata[METADATA_KEY] || { inventories: {} });
+
+    // Escuchar cambios
+    OBR.scene.onMetadataChange((metadata) => {
+        render(metadata[METADATA_KEY] || { inventories: {} });
+    });
 });
 
 async function setupDMView() {
     const selector = document.getElementById('player-selector');
-    selector.classList.remove('hidden');
-    document.getElementById('dm-controls').classList.remove('hidden');
-    
     const updateList = async () => {
         const players = await OBR.party.getPlayers();
-        selector.innerHTML = `<option value="${myId}">Mi Mochila</option>`;
+        const me = await OBR.player.getName();
+        selector.innerHTML = `<option value="${myId}">${me} (Tú)</option>`;
         players.forEach(p => selector.innerHTML += `<option value="${p.id}">${p.name}</option>`);
     };
-    
     selector.onchange = (e) => {
         viewedPlayerId = e.target.value;
         OBR.scene.getMetadata().then(meta => render(meta[METADATA_KEY] || { inventories: {} }));
@@ -31,93 +41,88 @@ async function setupDMView() {
 }
 
 function render(data) {
-    const inv = data.inventories[viewedPlayerId] || { items: [], coins: 0, enabledSlots: [] };
-    const grid = document.getElementById('grid');
-    const cellSize = 40;
-    grid.innerHTML = '';
-
-    // Si no tiene slots definidos, inicializar mochila básica 5x5
-    if (!inv.enabledSlots || inv.enabledSlots.length === 0) {
-        inv.enabledSlots = [];
-        for(let y=0; y<5; y++) for(let x=0; x<5; x++) inv.enabledSlots.push(`${x},${y}`);
+    const allInventories = data.inventories || {};
+    const inv = allInventories[viewedPlayerId] || { items: [], coins: 0, enabledSlots: [] };
+    
+    // Si no hay slots habilitados, mostrar un cuadrado 4x4 por defecto
+    const slots = inv.enabledSlots || [];
+    if (slots.length === 0 && viewedPlayerId === myId) {
+        for(let y=0; y<4; y++) for(let x=0; x<4; x++) slots.push(`${x},${y}`);
     }
 
-    // Dibujar fondo (slots)
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    // Generar 80 slots (8x10)
     for (let y = 0; y < 10; y++) {
         for (let x = 0; x < 8; x++) {
             const slot = document.createElement('div');
-            const isEnabled = inv.enabledSlots.includes(`${x},${y}`);
+            const isEnabled = slots.includes(`${x},${y}`);
             slot.className = `slot ${isEnabled ? '' : 'locked'}`;
             if (myRole === "GM") {
-                slot.onclick = () => toggleSlot(x, y); // El DM hace clic para habilitar/deshabilitar
+                slot.onclick = () => toggleSlot(x, y);
             }
             grid.appendChild(slot);
         }
     }
 
     // Dibujar Items
-    inv.items.forEach(item => {
+    const cellSize = 40;
+    (inv.items || []).forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
         const w = item.rotated ? item.h : item.w;
         const h = item.rotated ? item.w : item.h;
         el.style.width = `${w * cellSize}px`;
         el.style.height = `${h * cellSize}px`;
-        el.style.left = `${item.x * cellSize + (item.x)}px`; // +item.x por el gap
-        el.style.top = `${item.y * cellSize + (item.y)}px`;
+        el.style.left = `${item.x * (cellSize + 1)}px`;
+        el.style.top = `${item.y * (cellSize + 1)}px`;
         el.innerText = item.name;
         grid.appendChild(el);
     });
 
-    document.getElementById('coin-count').value = inv.coins;
+    document.getElementById('coin-count').value = inv.coins || 0;
+    document.getElementById('owner-name').innerText = (viewedPlayerId === myId) ? "MI INVENTARIO" : "INVENTARIO AJENO";
 }
 
 async function toggleSlot(x, y) {
     const metadata = await OBR.scene.getMetadata();
-    const data = JSON.parse(JSON.stringify(metadata[METADATA_KEY] || { inventories: {} }));
-    if (!data.inventories[viewedPlayerId]) data.inventories[viewedPlayerId] = { items: [], coins: 0, enabledSlots: [] };
+    let data = JSON.parse(JSON.stringify(metadata[METADATA_KEY] || { inventories: {} }));
     
-    const slotKey = `${x},${y}`;
-    const index = data.inventories[viewedPlayerId].enabledSlots.indexOf(slotKey);
-    if (index > -1) data.inventories[viewedPlayerId].enabledSlots.splice(index, 1);
-    else data.inventories[viewedPlayerId].enabledSlots.push(slotKey);
+    if (!data.inventories[viewedPlayerId]) {
+        data.inventories[viewedPlayerId] = { items: [], coins: 0, enabledSlots: [] };
+    }
+    
+    const slots = data.inventories[viewedPlayerId].enabledSlots;
+    const key = `${x},${y}`;
+    const index = slots.indexOf(key);
+    
+    if (index > -1) slots.splice(index, 1);
+    else slots.push(key);
     
     await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 }
 
-function isSpaceAvailable(newItem, inv) {
-    const w = newItem.rotated ? newItem.h : newItem.w;
-    const h = newItem.rotated ? newItem.w : newItem.h;
-    
-    for (let iy = 0; iy < h; iy++) {
-        for (let ix = 0; ix < w; ix++) {
-            if (!inv.enabledSlots.includes(`${newItem.x + ix},${newItem.y + iy}`)) return false;
-        }
-    }
-    return !inv.items.some(item => {
-        if (item.id === newItem.id) return false;
-        const iW = item.rotated ? item.h : item.w;
-        const iH = item.rotated ? item.w : item.h;
-        return newItem.x < item.x + iW && newItem.x + w > item.x && newItem.y < item.y + iH && newItem.y + h > item.y;
-    });
-}
-
 window.addNewItem = async () => {
     const metadata = await OBR.scene.getMetadata();
-    const data = JSON.parse(JSON.stringify(metadata[METADATA_KEY] || { inventories: {} }));
-    const inv = data.inventories[viewedPlayerId];
+    let data = JSON.parse(JSON.stringify(metadata[METADATA_KEY] || { inventories: {} }));
+    const inv = data.inventories[viewedPlayerId] || { items: [], coins: 0, enabledSlots: ["0,0"] };
     
     const newItem = { id: crypto.randomUUID(), name: "OBJETO", x: 0, y: 0, w: 1, h: 1, rotated: false };
+    
+    // Buscar primer slot habilitado para intentar colocarlo
     let placed = false;
     for (let y = 0; y < 10; y++) {
         for (let x = 0; x < 8; x++) {
             newItem.x = x; newItem.y = y;
-            if (isSpaceAvailable(newItem, inv)) {
+            if (inv.enabledSlots.includes(`${x},${y}`)) { // Simplificación para test
                 inv.items.push(newItem);
                 placed = true; break;
             }
         }
         if (placed) break;
     }
-    if (placed) await OBR.scene.setMetadata({ [METADATA_KEY]: data });
+
+    data.inventories[viewedPlayerId] = inv;
+    await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 };
