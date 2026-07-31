@@ -2,9 +2,11 @@
     "name": "HB Inventory System",
     "version": "1.0.1",
     "manifest_version": 1,
-    "description": "Inventario personalizado para Mua",
+    "description": "Inventario personalizado para",
+    "icon": "./icon.png",
     "action": {
       "title": "Inventory Stuff",
+      "icon": "./icon.png",
       "popover": "./index.html",
       "width": 380,
       "height": 650
