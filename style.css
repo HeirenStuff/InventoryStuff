@@ -1,81 +1,21 @@
-:root {
-    --gold: #d4af37;
-    --bg: #0a0a0a;
-    --slot-bg: #111;
-}
-
 body {
-    background: var(--bg);
-    color: var(--gold);
-    font-family: 'Courier New', monospace;
-    width: 340px;
-    margin: 0;
-    padding: 10px;
-    user-select: none;
-}
-
-.hidden { display: none !important; }
-
-#role-badge { font-size: 10px; text-align: right; margin-bottom: 4px; }
-
-/* Monedas en horizontal */
-.currency-row {
+    background-color: #1a1a1a;
+    color: white;
+    font-family: sans-serif;
     display: flex;
-    justify-content: space-between;
-    background: #151515;
-    padding: 8px;
-    border: 1px solid #333;
-    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
 }
 
-.currency-field { display: flex; align-items: center; gap: 4px; font-size: 12px; }
-
-input[type="number"] {
-    width: 40px;
-    background: #000;
-    color: #0f0;
-    border: 1px solid var(--gold);
+#status-card {
+    border: 2px solid #d4af37;
+    padding: 20px;
+    border-radius: 8px;
     text-align: center;
 }
 
-/* Grid 8x10 */
-.inventory-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 40px);
-    grid-template-rows: repeat(10, 40px);
-    gap: 1px;
-    background: #444;
-    border: 2px solid var(--gold);
-    position: relative;
-    width: 327px; /* (8 * 40) + 7px gaps */
-}
-
-.slot { width: 40px; height: 40px; background: var(--slot-bg); }
-.slot.locked { background: repeating-linear-gradient(45deg, #000 0 2px, #222 2px 4px); }
-
-.item {
-    position: absolute;
-    background: rgba(212, 175, 55, 0.1);
-    border: 1px solid var(--gold);
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-.item img { max-width: 90%; max-height: 90%; pointer-events: none; }
-
-#gm-panel {
-    background: #222;
-    padding: 8px;
-    border: 1px solid var(--gold);
-    margin-bottom: 10px;
-}
-
-select, button {
-    background: #000;
-    color: #fff;
-    border: 1px solid var(--gold);
-    padding: 4px;
-}
+.role-gm { color: #d4af37; font-weight: bold; }
+.role-player { color: #00ff00; font-weight: bold; }

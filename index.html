@@ -1,29 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
 </head>
 <body>
-    <div id="role-badge">CARGANDO...</div>
-    <h3 id="view-title" style="margin: 5px 0;">INVENTARIO</h3>
-
-    <div id="gm-panel" class="hidden">
-        <select id="player-select" style="width: 100%; margin-bottom: 5px;"></select>
-        <div style="display: flex; gap: 5px;">
-            <select id="catalog-select" style="flex-grow: 1;"></select>
-            <button id="add-btn">DAR</button>
-        </div>
+    <div id="status-card">
+        <h1 id="player-name">Cargando...</h1>
+        <p>Tu rol es: <span id="player-role">...</span></p>
     </div>
-
-    <div class="currency-row">
-        <div class="currency-field">PO <input type="number" id="coin-gold"></div>
-        <div class="currency-field">PP <input type="number" id="coin-silver"></div>
-        <div class="currency-field">PC <input type="number" id="coin-copper"></div>
-    </div>
-
-    <div id="grid" class="inventory-grid"></div>
-
     <script src="script.js"></script>
 </body>
 </html>
