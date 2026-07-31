@@ -3,85 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OBR Info Fix</title>
+  <title>OBR Player Info</title>
   <style>
-    body { font-family: sans-serif; color: white; background: #242424; margin: 0; padding: 10px; text-align: center; }
-    #info-card { background: #333; padding: 15px; border-radius: 8px; border: 2px dashed #555; }
-    .role { font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 5px; }
-    .gm { color: #bb86fc; }
-    .player { color: #03dac6; }
-    .status { font-size: 0.7em; color: #777; margin-top: 10px; }
+    /* Diseño compacto y oscuro estilo Owlbear */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #242424;
+      color: #eee;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #container {
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      background: #333;
+      border: 1px solid #444;
+      min-width: 160px;
+    }
+    .role-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      display: block;
+      color: #aaa;
+    }
+    .role-name {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    /* Colores por rol */
+    .gm { color: #bb86fc; }      /* Morado para DM */
+    .player { color: #03dac6; }  /* Turquesa para Jugador */
   </style>
 </head>
 <body>
 
-  <div id="info-card">
-    <div id="content">Esperando SDK...</div>
-    <div id="debug-log" class="status">Cargando script...</div>
+  <div id="container">
+    <div id="app">Cargando SDK local...</div>
   </div>
 
-  <!-- URL corregida para asegurar que cargue la versión de navegador (UMD) -->
-  <script src="https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js"></script>
+  <!-- Referencia al archivo que copiaste de node_modules -->
+  <script src="./obr-sdk.js"></script>
 
   <script>
-    const content = document.getElementById('content');
-    const debugLog = document.getElementById('debug-log');
+    // Referencia al div donde inyectaremos la info
+    const app = document.getElementById('app');
 
-    function log(msg) {
-      console.log(`[OBR-DEBUG]: ${msg}`);
-      debugLog.innerText = msg;
+    // Función que consulta la API de OBR y actualiza el HTML
+    async function updateUI() {
+      try {
+        const role = await OBR.player.getRole();
+        const name = await OBR.player.getName();
+
+        if (role === "GM") {
+          app.innerHTML = `
+            <span class="role-label">Tu Rol</span>
+            <div class="role-name gm">ERES EL DM</div>
+          `;
+        } else {
+          app.innerHTML = `
+            <span class="role-label">Jugador</span>
+            <div class="role-name player">${name}</div>
+          `;
+        }
+      } catch (error) {
+        app.innerText = "Error al obtener datos";
+        console.error(error);
+      }
     }
 
-    // Función principal
-    async function startExtension() {
-      log("Iniciando OBR.onReady...");
+    // OBR.onReady se dispara cuando la extensión detecta que está dentro de Owlbear
+    OBR.onReady(() => {
+      console.log("SDK Local detectada y lista.");
       
-      OBR.onReady(async () => {
-        log("SDK conectada con Owlbear Rodeo.");
-        
-        const updateData = async () => {
-          try {
-            log("Obteniendo datos...");
-            const role = await OBR.player.getRole();
-            const name = await OBR.player.getName();
-            log(`Datos: ${role} - ${name}`);
+      // Primera carga
+      updateUI();
 
-            if (role === "GM") {
-              content.innerHTML = `<span class="role gm">ERES EL DM</span>`;
-            } else {
-              content.innerHTML = `
-                <span class="role player">JUGADOR</span>
-                <div style="font-size: 1.3em;">${name}</div>
-              `;
-            }
-          } catch (e) {
-            log("Error obteniendo datos: " + e.message);
-          }
-        };
-
-        // Ejecutar y suscribir
-        updateData();
-        OBR.player.onChange(updateData);
+      // Escuchar si el jugador cambia su nombre mientras la extensión está abierta
+      OBR.player.onChange(() => {
+        updateUI();
       });
-    }
+    });
 
-    // Verificamos si la variable OBR existe cada 100ms hasta que cargue el script
-    const checkInterval = setInterval(() => {
-      log("Verificando si 'window.OBR' existe...");
-      if (typeof window.OBR !== 'undefined') {
-        log("¡OBR detectado!");
-        clearInterval(checkInterval);
-        startExtension();
-      }
-    }, 200);
-
-    // Timeout por si el script falla en cargar
+    // Pequeño chequeo de seguridad
     setTimeout(() => {
-      if (typeof window.OBR === 'undefined') {
-        log("ERROR: El script de la SDK no cargó.");
-        content.innerText = "Error: SDK no disponible";
+      if (typeof OBR === 'undefined') {
+        app.innerHTML = "<span style='color:red'>No se encontró obr-sdk.js al lado del index.html</span>";
       }
-    }, 5000);
+    }, 2000);
   </script>
 </body>
 </html>
