@@ -3,10 +3,8 @@
     "version": "1.0.1",
     "manifest_version": 1,
     "description": "Inventario personalizado para Mua",
-    "icon": "./icon.png",
     "action": {
       "title": "Inventory Stuff",
-      "icon": "./icon.png",
       "popover": "./index.html",
       "width": 380,
       "height": 650
