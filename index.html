@@ -3,8 +3,35 @@
 <head>
     <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
 </head>
-<body style="background: #222; color: white;">
-    <h1 id="status">Esperando a Owlbear...</h1>
-    <script src="script.js"></script>
+<body style="background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+    
+    <h1 id="status">Esperando SDK...</h1>
+    <p id="debug">Estado: Iniciando</p>
+
+    <script>
+        // Log para ver en consola si el script arranca
+        console.log("APP: Script de detección iniciado");
+        document.getElementById("debug").innerText = "Estado: Script cargado, esperando a Owlbear...";
+
+        OBR.onReady(async () => {
+            console.log("APP: OBR.onReady ejecutado");
+            try {
+                const name = await OBR.player.getName();
+                const role = await OBR.player.getRole();
+                const id = await OBR.player.getId();
+
+                document.getElementById("status").innerText = "¡CONECTADO!";
+                document.getElementById("debug").innerHTML = `
+                    Nombre: ${name} <br>
+                    Rol: <b>${role}</b> <br>
+                    ID: ${id}
+                `;
+                console.log("APP: Datos recibidos", {name, role, id});
+            } catch (err) {
+                console.error("APP: Error obteniendo datos", err);
+                document.getElementById("debug").innerText = "Error al obtener datos del jugador";
+            }
+        });
+    </script>
 </body>
 </html>
