@@ -3,77 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OBR Info</title>
+  <title>OBR Debugger</title>
   <style>
-    /* Estilo visual compacto */
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      color: white;
-      background: #242424;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    #info-card {
-      background: #333;
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid #555;
-      min-width: 150px;
-    }
-    .role {
-      font-weight: bold;
-      color: #bb86fc;
-      display: block;
-      margin-bottom: 5px;
-    }
-    .name {
-      font-size: 1.1em;
-      color: #03dac6;
-    }
+    body { font-family: sans-serif; color: white; background: #242424; margin: 0; padding: 10px; text-align: center; }
+    #info-card { background: #333; padding: 15px; border-radius: 8px; border: 1px solid #555; }
+    .status { font-size: 0.8em; color: #888; margin-top: 10px; border-top: 1px solid #444; padding-top: 5px; }
   </style>
 </head>
 <body>
 
-  <div id="app">
-    <div id="info-card">Cargando datos...</div>
+  <div id="info-card">
+    <div id="content">Iniciando SDK...</div>
+    <div id="status-log" class="status">Esperando conexión...</div>
   </div>
 
-  <!-- Importamos la SDK de Owlbear Rodeo -->
   <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
 
   <script>
-    // Esperamos a que la SDK esté lista
+    const content = document.getElementById('content');
+    const statusLog = document.getElementById('status-log');
+
+    function log(msg) {
+      console.log(`[OBR-DEBUG]: ${msg}`);
+      statusLog.innerText = msg;
+    }
+
+    console.log("[OBR-DEBUG]: Script cargado. Comprobando OBR...");
+
+    if (typeof OBR === 'undefined') {
+      log("ERROR: SDK de OBR no encontrada.");
+      content.innerText = "Error: No se cargó la SDK";
+    }
+
+    // Comprobar si estamos en OBR
+    if (!OBR.isAvailable) {
+      log("Aviso: No estoy en una instancia de Owlbear.");
+    }
+
     OBR.onReady(async () => {
-      const app = document.getElementById('info-card');
+      log("SDK Lista (onReady disparado)");
 
       async function updateInfo() {
-        // Obtenemos el Rol y el Nombre usando la API de Player
-        const role = await OBR.player.getRole();
-        const name = await OBR.player.getName();
+        try {
+          log("Pidiendo Rol...");
+          const role = await OBR.player.getRole();
+          log(`Rol recibido: ${role}`);
 
-        if (role === "GM") {
-          app.innerHTML = `<span class="role">Eres el GM</span>`;
-        } else {
-          app.innerHTML = `
-            <span class="role">Jugador</span>
-            <span class="name">${name}</span>
-          `;
+          log("Pidiendo Nombre...");
+          const name = await OBR.player.getName();
+          log(`Nombre recibido: ${name}`);
+
+          if (role === "GM") {
+            content.innerHTML = `<b style="color: #bb86fc;">ERES EL DM (GM)</b>`;
+          } else {
+            content.innerHTML = `
+              <div style="color: #03dac6;">JUGADOR</div>
+              <div style="font-size: 1.2em;">${name}</div>
+            `;
+          }
+          log("Renderizado completado con éxito.");
+        } catch (error) {
+          console.error("[OBR-DEBUG] Error en updateInfo:", error);
+          log("Error obteniendo datos del jugador.");
         }
       }
 
-      // Ejecutar al cargar
+      // Primera ejecución
       updateInfo();
 
-      // Opcional: Suscribirse a cambios por si el usuario cambia su nombre
-      OBR.player.onChange(() => {
+      // Suscribirse a cambios
+      OBR.player.onChange((player) => {
+        log("Cambio detectado en el jugador, actualizando...");
         updateInfo();
       });
     });
+
+    // Timeout de seguridad por si onReady nunca se dispara
+    setTimeout(() => {
+      if (content.innerText === "Iniciando SDK...") {
+        log("ERROR: onReady tardó demasiado (¿estás fuera de OBR?)");
+        content.innerText = "Error de conexión con OBR";
+      }
+    }, 5000);
   </script>
 </body>
 </html>
