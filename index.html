@@ -1,30 +1,29 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
     <script src="https://unpkg.com/@owlbear-rodeo/sdk"></script>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="role-badge">CONECTANDO...</div>
-    <h2 id="owner-name" style="font-size: 14px; margin: 5px 0;">INVENTARIO</h2>
+    <div id="role-badge">CARGANDO...</div>
+    <h3 id="view-title" style="margin: 5px 0;">INVENTARIO</h3>
 
-    <div id="gm-console" class="hidden">
-        <select id="player-selector" style="width: 100%; margin-bottom: 5px;"></select>
+    <div id="gm-panel" class="hidden">
+        <select id="player-select" style="width: 100%; margin-bottom: 5px;"></select>
         <div style="display: flex; gap: 5px;">
-            <select id="item-catalog-selector" style="flex-grow: 1;"></select>
-            <button id="btn-add">DAR</button>
+            <select id="catalog-select" style="flex-grow: 1;"></select>
+            <button id="add-btn">DAR</button>
         </div>
     </div>
 
-    <div class="currency-container">
-        <div class="currency-field"><span>PO</span><input type="number" id="coin-gold"></div>
-        <div class="currency-field"><span>PP</span><input type="number" id="coin-silver"></div>
-        <div class="currency-field"><span>PC</span><input type="number" id="coin-copper"></div>
+    <div class="currency-row">
+        <div class="currency-field">PO <input type="number" id="coin-gold"></div>
+        <div class="currency-field">PP <input type="number" id="coin-silver"></div>
+        <div class="currency-field">PC <input type="number" id="coin-copper"></div>
     </div>
 
     <div id="grid" class="inventory-grid"></div>
 
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

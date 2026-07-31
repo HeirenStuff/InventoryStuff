@@ -1,59 +1,63 @@
 :root {
-    --bg-dark: #0a0a0a;
-    --accent-gold: #d4af37;
-    --item-bg: rgba(212, 175, 55, 0.15);
+    --gold: #d4af37;
+    --bg: #0a0a0a;
+    --slot-bg: #111;
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--accent-gold);
-    font-family: 'Courier New', Courier, monospace;
-    width: 350px;
-    padding: 10px;
+    background: var(--bg);
+    color: var(--gold);
+    font-family: 'Courier New', monospace;
+    width: 340px;
     margin: 0;
+    padding: 10px;
+    user-select: none;
 }
 
 .hidden { display: none !important; }
 
-/* MONEDAS HORIZONTALES */
-.currency-container {
+#role-badge { font-size: 10px; text-align: right; margin-bottom: 4px; }
+
+/* Monedas en horizontal */
+.currency-row {
     display: flex;
     justify-content: space-between;
-    margin: 10px 0;
-    padding: 5px;
+    background: #151515;
+    padding: 8px;
     border: 1px solid #333;
+    margin-bottom: 10px;
 }
 
-.currency-field {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
+.currency-field { display: flex; align-items: center; gap: 4px; font-size: 12px; }
 
 input[type="number"] {
-    width: 45px;
+    width: 40px;
     background: #000;
     color: #0f0;
-    border: 1px solid var(--accent-gold);
+    border: 1px solid var(--gold);
+    text-align: center;
 }
 
+/* Grid 8x10 */
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: #222;
-    border: 2px solid var(--accent-gold);
+    background: #444;
+    border: 2px solid var(--gold);
     position: relative;
+    width: 327px; /* (8 * 40) + 7px gaps */
 }
 
-.slot { width: 40px; height: 40px; background-color: #111; }
-.slot.locked { background: repeating-linear-gradient(45deg, #000, #000 2px, #222 2px, #222 4px); }
+.slot { width: 40px; height: 40px; background: var(--slot-bg); }
+.slot.locked { background: repeating-linear-gradient(45deg, #000 0 2px, #222 2px 4px); }
 
 .item {
     position: absolute;
-    background: var(--item-bg);
-    border: 1px solid var(--accent-gold);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold);
+    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,3 +65,17 @@ input[type="number"] {
 }
 
 .item img { max-width: 90%; max-height: 90%; pointer-events: none; }
+
+#gm-panel {
+    background: #222;
+    padding: 8px;
+    border: 1px solid var(--gold);
+    margin-bottom: 10px;
+}
+
+select, button {
+    background: #000;
+    color: #fff;
+    border: 1px solid var(--gold);
+    padding: 4px;
+}
