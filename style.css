@@ -1,0 +1,23 @@
+.inventory-grid {
+    width: 400px; /* 8 columnas de 50px */
+    height: 600px;
+    background-image: 
+        linear-gradient(to right, #333 1px, transparent 1px),
+        linear-gradient(to bottom, #333 1px, transparent 1px);
+    background-size: 50px 50px;
+    position: relative;
+    background-color: #050505;
+}
+
+.item {
+    position: absolute;
+    background: rgba(0, 255, 0, 0.2);
+    border: 2px solid #0f0;
+    color: white;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}

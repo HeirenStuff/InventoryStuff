@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>INVENTARIO</h1>
+        
+        <!-- Contador de Monedas -->
+        <div class="coin-container">
+            <span>MONEDAS:</span>
+            <input type="number" id="coin-count" value="0">
+        </div>
+
+        <!-- Cuadrícula de Inventario -->
+        <div id="grid" class="inventory-grid">
+            <!-- Los slots se generarán con JS -->
+        </div>
+
+        <div id="dm-controls" class="hidden">
+            <button id="add-item">Dar Item (DM)</button>
+        </div>
+    </div>
+
+    <!-- Importamos el SDK de Owlbear -->
+    <script src="https://unpkg.com/@owlbear-rodeo/sdk/dist/obr.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
