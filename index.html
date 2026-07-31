@@ -5,99 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBR Player Info</title>
   <style>
-    /* Diseño compacto y oscuro estilo Owlbear */
     body {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: #242424;
       color: #eee;
       margin: 0;
-      padding: 0;
+      padding: 10px;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
-    }
-    #container {
       text-align: center;
-      padding: 15px;
-      border-radius: 8px;
+    }
+    #card {
       background: #333;
+      padding: 20px;
+      border-radius: 12px;
       border: 1px solid #444;
-      min-width: 160px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      min-width: 180px;
     }
-    .role-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-      display: block;
-      color: #aaa;
-    }
-    .role-name {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-    /* Colores por rol */
-    .gm { color: #bb86fc; }      /* Morado para DM */
-    .player { color: #03dac6; }  /* Turquesa para Jugador */
+    .label { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .value { font-weight: bold; font-size: 1.3rem; }
+    .gm { color: #bb86fc; }
+    .player { color: #03dac6; }
+    .error { color: #ff5555; font-size: 0.8rem; }
   </style>
 </head>
 <body>
 
-  <div id="container">
-    <div id="app">Cargando SDK local...</div>
+  <div id="card">
+    <div id="app">Cargando Owlbear SDK...</div>
   </div>
 
-  <!-- Referencia al archivo que copiaste de node_modules -->
-  <script src="./obr-sdk.js"></script>
+  <!-- Usamos la URL directa al archivo UMD que define 'window.OBR' -->
+  <script src="https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js"></script>
 
   <script>
-    // Referencia al div donde inyectaremos la info
     const app = document.getElementById('app');
 
-    // Función que consulta la API de OBR y actualiza el HTML
-    async function updateUI() {
+    // Función para actualizar la interfaz
+    async function updateInfo() {
       try {
         const role = await OBR.player.getRole();
         const name = await OBR.player.getName();
 
         if (role === "GM") {
-          app.innerHTML = `
-            <span class="role-label">Tu Rol</span>
-            <div class="role-name gm">ERES EL DM</div>
-          `;
+          app.innerHTML = `<span class="label">Rol actual</span><div class="value gm">ERES EL DM</div>`;
         } else {
           app.innerHTML = `
-            <span class="role-label">Jugador</span>
-            <div class="role-name player">${name}</div>
+            <span class="label">Jugador</span>
+            <div class="value player">${name}</div>
           `;
         }
-      } catch (error) {
-        app.innerText = "Error al obtener datos";
-        console.error(error);
+      } catch (err) {
+        console.error("Error al obtener datos:", err);
+        app.innerHTML = `<div class="error">Error al leer datos de OBR</div>`;
       }
     }
 
-    // OBR.onReady se dispara cuando la extensión detecta que está dentro de Owlbear
-    OBR.onReady(() => {
-      console.log("SDK Local detectada y lista.");
-      
-      // Primera carga
-      updateUI();
-
-      // Escuchar si el jugador cambia su nombre mientras la extensión está abierta
-      OBR.player.onChange(() => {
-        updateUI();
-      });
-    });
-
-    // Pequeño chequeo de seguridad
-    setTimeout(() => {
+    // Función de inicio
+    function init() {
       if (typeof OBR === 'undefined') {
-        app.innerHTML = "<span style='color:red'>No se encontró obr-sdk.js al lado del index.html</span>";
+        app.innerHTML = `<div class="error">Error: OBR no definido.<br>Revisa la conexión.</div>`;
+        return;
       }
-    }, 2000);
+
+      OBR.onReady(() => {
+        updateInfo();
+        // Si el jugador cambia nombre o color, se actualiza solo
+        OBR.player.onChange(updateInfo);
+      });
+    }
+
+    // Esperar un momento a que el script de unpkg cargue
+    window.onload = init;
   </script>
 </body>
 </html>
