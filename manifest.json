@@ -1,14 +1,14 @@
 {
     "name": "HB Inventory System",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "manifest_version": 1,
-    "description": "Homebrew inventory system for mua",
-    "icon": "/icon.png",
+    "description": "Inventario personalizado para Mua",
+    "icon": "./icon.png",
     "action": {
       "title": "Inventory Stuff",
-      "icon": "/icon.png",
-      "popover": "/index.html",
-      "width": 400,
-      "height": 600
+      "icon": "./icon.png",
+      "popover": "./index.html",
+      "width": 380,
+      "height": 650
     }
   }

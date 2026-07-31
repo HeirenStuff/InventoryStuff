@@ -1,11 +1,14 @@
-// No uses import si usas el script tag de unpkg en el HTML
 const METADATA_KEY = "com.heirenstuff.inventory/data";
 let myId, myRole, viewedPlayerId;
 
-OBR.onReady(async () => {
-    console.log("Owlbear Rodeo detectado y listo.");
-    
-    try {
+// Función de inicio robusta
+async function init() {
+    if (typeof OBR === 'undefined') {
+        setTimeout(init, 100); // Reintentar si el SDK no cargó
+        return;
+    }
+
+    OBR.onReady(async () => {
         myId = await OBR.player.getId();
         myRole = await OBR.player.getRole();
         viewedPlayerId = myId;
@@ -17,30 +20,25 @@ OBR.onReady(async () => {
         if (myRole === "GM") {
             document.getElementById('gm-console').classList.remove('hidden');
             setupDMView();
+            setupGMEvents();
         }
 
-        setupEvents();
-        
         OBR.scene.onMetadataChange((metadata) => {
             render(metadata[METADATA_KEY] || { inventories: {} });
         });
 
         const metadata = await OBR.scene.getMetadata();
         render(metadata[METADATA_KEY] || { inventories: {} });
-        
-    } catch (error) {
-        console.error("Error inicializando:", error);
-    }
-});
+    });
+}
 
-function setupEvents() {
+function setupGMEvents() {
     ['gold', 'silver', 'copper'].forEach(type => {
-        const input = document.getElementById(`coin-${type}`);
-        input.onchange = (e) => {
-            if (myRole === "GM") updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
+        document.getElementById(`coin-${type}`).onchange = (e) => {
+            updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
         };
     });
-    document.getElementById('btn-add').onclick = () => addNewItem();
+    document.getElementById('btn-add').onclick = addNewItem;
 }
 
 async function setupDMView() {
@@ -122,12 +120,12 @@ async function addNewItem() {
     const meta = await OBR.scene.getMetadata();
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
     const inv = data.inventories[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
-    if (!inv.enabledSlots || inv.enabledSlots.length === 0) {
-        OBR.notification.show("Primero habilita espacios clicando en el grid.");
-        return;
-    }
+    if (!inv.enabledSlots || inv.enabledSlots.length === 0) return;
     const [x, y] = inv.enabledSlots[0].split(',');
     inv.items.push({ id: crypto.randomUUID(), name: "NUEVO", x: parseInt(x), y: parseInt(y), w: 1, h: 1, rotated: false });
     data.inventories[viewedPlayerId] = inv;
     await OBR.scene.setMetadata({ [METADATA_KEY]: data });
 }
+
+// Arrancamos la inicialización
+init();
