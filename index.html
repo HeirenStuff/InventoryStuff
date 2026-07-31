@@ -1,28 +1,17 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="app">
-        <div id="header">
-            <h2 id="owner-name">MI INVENTARIO</h2>
-            <select id="player-selector" class="hidden"></select>
-        </div>
-        
-        <div class="coin-container">
-            <span>MONEDAS:</span>
-            <input type="number" id="coin-count" value="0">
-        </div>
-
-        <div id="grid" class="inventory-grid"></div>
-
-        <div id="dm-controls" class="hidden">
-            <button onclick="addNewItem()">+ Dar Item</button>
-        </div>
+<div id="app">
+    <div id="header">
+        <h2 id="owner-name">Cargando...</h2>
+        <select id="player-selector" class="hidden"></select>
     </div>
-    <script src="https://unpkg.com/@owlbear-rodeo/sdk/dist/obr.js"></script>
-    <script src="script.js" type="module"></script>
-</body>
-</html>
+    
+    <div class="coin-container">
+        <span>TESORO (GOLD):</span>
+        <input type="number" id="coin-count" value="0">
+    </div>
+
+    <div id="grid" class="inventory-grid"></div>
+
+    <div id="dm-controls" class="hidden" style="margin-top: 10px;">
+        <button onclick="addNewItem()" style="width: 100%;">+ Dar Item</button>
+    </div>
+</div>
