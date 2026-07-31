@@ -1,37 +1,45 @@
-import OBR from "@owlbear-rodeo/sdk";
-
+// No uses import si usas el script tag de unpkg en el HTML
 const METADATA_KEY = "com.heirenstuff.inventory/data";
 let myId, myRole, viewedPlayerId;
 
 OBR.onReady(async () => {
-    myId = await OBR.player.getId();
-    myRole = await OBR.player.getRole();
-    viewedPlayerId = myId;
+    console.log("Owlbear Rodeo detectado y listo.");
+    
+    try {
+        myId = await OBR.player.getId();
+        myRole = await OBR.player.getRole();
+        viewedPlayerId = myId;
 
-    const badge = document.getElementById('role-badge');
-    badge.innerText = `MODO: ${myRole}`;
-    badge.style.color = myRole === "GM" ? "#cc9a49" : "#aaa";
+        const badge = document.getElementById('role-badge');
+        badge.innerText = `MODO: ${myRole}`;
+        badge.style.color = myRole === "GM" ? "#cc9a49" : "#aaa";
 
-    if (myRole === "GM") {
-        document.getElementById('gm-console').classList.remove('hidden');
-        setupDMView();
+        if (myRole === "GM") {
+            document.getElementById('gm-console').classList.remove('hidden');
+            setupDMView();
+        }
+
+        setupEvents();
+        
+        OBR.scene.onMetadataChange((metadata) => {
+            render(metadata[METADATA_KEY] || { inventories: {} });
+        });
+
+        const metadata = await OBR.scene.getMetadata();
+        render(metadata[METADATA_KEY] || { inventories: {} });
+        
+    } catch (error) {
+        console.error("Error inicializando:", error);
     }
-
-    setupEvents();
-    
-    OBR.scene.onMetadataChange((metadata) => render(metadata[METADATA_KEY] || { inventories: {} }));
-    
-    const metadata = await OBR.scene.getMetadata();
-    render(metadata[METADATA_KEY] || { inventories: {} });
 });
 
 function setupEvents() {
     ['gold', 'silver', 'copper'].forEach(type => {
-        document.getElementById(`coin-${type}`).onchange = (e) => {
+        const input = document.getElementById(`coin-${type}`);
+        input.onchange = (e) => {
             if (myRole === "GM") updateCurrency(viewedPlayerId, type, parseInt(e.target.value) || 0);
         };
     });
-    // Asignación manual del botón de otorgar
     document.getElementById('btn-add').onclick = () => addNewItem();
 }
 
@@ -115,7 +123,7 @@ async function addNewItem() {
     const data = JSON.parse(JSON.stringify(meta[METADATA_KEY] || { inventories: {} }));
     const inv = data.inventories[viewedPlayerId] || { items: [], coins: {}, enabledSlots: [] };
     if (!inv.enabledSlots || inv.enabledSlots.length === 0) {
-        OBR.notification.show("Activa slots primero haciendo clic en el grid.");
+        OBR.notification.show("Primero habilita espacios clicando en el grid.");
         return;
     }
     const [x, y] = inv.enabledSlots[0].split(',');
