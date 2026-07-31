@@ -150,3 +150,23 @@ button:hover {
     padding: 2px !important;
     font-size: 12px;
 }
+
+/*GM COsa*/
+
+#role-badge {
+    font-size: 9px;
+    text-align: center;
+    padding: 2px;
+    background: #333;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+#gm-console {
+    background: #222;
+    padding: 10px;
+    border: 1px dashed var(--accent-gold);
+    margin-bottom: 10px;
+}
+
+#gm-console select { width: 100%; margin-bottom: 5px; }

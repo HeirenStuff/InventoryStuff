@@ -2,36 +2,29 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div id="app">
+        <div id="role-badge">Detectando rol...</div>
+        
         <div id="header" class="coin-container">
-            <h2 id="owner-name">Inventario</h2>
-            <select id="player-selector" style="display:none"></select>
+            <h2 id="owner-name">INVENTARIO</h2>
+        </div>
+
+        <div id="gm-console" class="hidden">
+            <h3 style="color:var(--accent-gold); font-size:10px; margin:5px 0;">CONSOLA GM</h3>
+            <select id="player-selector"></select>
+            <button id="btn-add">+ Dar item</button>
         </div>
         
         <div class="currency-container">
-            <div class="currency-field">
-                <span>PO:</span>
-                <input type="number" id="coin-gold" value="0">
-            </div>
-            <div class="currency-field">
-                <span>PP:</span>
-                <input type="number" id="coin-silver" value="0">
-            </div>
-            <div class="currency-field">
-                <span>PC:</span>
-                <input type="number" id="coin-copper" value="0">
-            </div>
+            <div class="currency-field"><span>PO:</span><input type="number" id="coin-gold"></div>
+            <div class="currency-field"><span>PP:</span><input type="number" id="coin-silver"></div>
+            <div class="currency-field"><span>PC:</span><input type="number" id="coin-copper"></div>
         </div>
 
         <div id="grid" class="inventory-grid"></div>
-
-        <div id="dm-controls" style="display:none; margin-top: 10px;">
-            <button onclick="addNewItem()">+ Dar item</button>
-        </div>
     </div>
     <script src="https://unpkg.com/@owlbear-rodeo/sdk/dist/obr.js"></script>
     <script src="./script.js" type="module"></script>
