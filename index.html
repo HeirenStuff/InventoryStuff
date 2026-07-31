@@ -2,84 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBR Player Info</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #242424;
-      color: #eee;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    #card {
-      background: #333;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid #444;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      min-width: 180px;
-    }
-    .label { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; }
-    .value { font-weight: bold; font-size: 1.3rem; }
-    .gm { color: #bb86fc; }
-    .player { color: #03dac6; }
-    .error { color: #ff5555; font-size: 0.8rem; }
+    body { font-family: sans-serif; background: #242424; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    #card { background: #333; padding: 20px; border-radius: 10px; border: 1px solid #555; text-align: center; min-width: 200px; }
+    .gm { color: #bb86fc; font-weight: bold; }
+    .player { color: #03dac6; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <div id="card">
-    <div id="app">Cargando Owlbear SDK...</div>
+    <div id="content">Cargando...</div>
   </div>
 
-  <!-- Usamos la URL directa al archivo UMD que define 'window.OBR' -->
+  <!-- ESTA ES LA CLAVE: Usar la versión compilada para navegador -->
   <script src="https://unpkg.com/@owlbear-rodeo/sdk@latest/dist/obr-sdk.js"></script>
 
   <script>
-    const app = document.getElementById('app');
+    // 1. Verificamos inmediatamente si el script cargó
+    console.log("Comprobando SDK...");
+    
+    const content = document.getElementById('content');
 
-    // Función para actualizar la interfaz
-    async function updateInfo() {
-      try {
-        const role = await OBR.player.getRole();
-        const name = await OBR.player.getName();
-
-        if (role === "GM") {
-          app.innerHTML = `<span class="label">Rol actual</span><div class="value gm">ERES EL DM</div>`;
-        } else {
-          app.innerHTML = `
-            <span class="label">Jugador</span>
-            <div class="value player">${name}</div>
-          `;
-        }
-      } catch (err) {
-        console.error("Error al obtener datos:", err);
-        app.innerHTML = `<div class="error">Error al leer datos de OBR</div>`;
-      }
-    }
-
-    // Función de inicio
-    function init() {
+    function start() {
       if (typeof OBR === 'undefined') {
-        app.innerHTML = `<div class="error">Error: OBR no definido.<br>Revisa la conexión.</div>`;
+        content.innerText = "Error: SDK no cargada";
+        console.error("La variable OBR no existe.");
         return;
       }
 
-      OBR.onReady(() => {
-        updateInfo();
-        // Si el jugador cambia nombre o color, se actualiza solo
-        OBR.player.onChange(updateInfo);
+      // 2. OBR.onReady solo funciona si el HTML está dentro de Owlbear Rodeo
+      OBR.onReady(async () => {
+        console.log("OBR listo!");
+        
+        const update = async () => {
+          const role = await OBR.player.getRole();
+          const name = await OBR.player.getName();
+          
+          if (role === "GM") {
+            content.innerHTML = `Rol: <span class="gm">DM</span>`;
+          } else {
+            content.innerHTML = `Jugador: <span class="player">${name}</span>`;
+          }
+        };
+
+        update();
+        OBR.player.onChange(update);
       });
     }
 
-    // Esperar un momento a que el script de unpkg cargue
-    window.onload = init;
+    // Ejecutar al cargar la ventana
+    window.onload = start;
   </script>
 </body>
 </html>
