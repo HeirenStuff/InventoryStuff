@@ -9,22 +9,48 @@ const ITEM_CATALOG = [
     { id: "knife", name: "Cuchillo", img: "https://i.ibb.co/9V5LzD8/knife.png", w: 1, h: 2 }
 ];
 
+const METADATA_KEY = "com.heirenstuff.inventory/data";
+let myId, myRole, viewedPlayerId;
+
 async function init() {
+    // OBR.onReady es la forma correcta de esperar al SDK
     OBR.onReady(async () => {
-        myId = await OBR.player.getId();
-        myRole = await OBR.player.getRole();
-        viewedPlayerId = myId;
+        try {
+            myId = await OBR.player.getId();
+            myRole = await OBR.player.getRole();
+            viewedPlayerId = myId;
 
-        setupUI();
-        
-        OBR.scene.onMetadataChange((metadata) => {
+            // Configurar UI básica
+            const badge = document.getElementById('role-badge');
+            if (badge) {
+                badge.innerText = `MODO: ${myRole}`;
+                badge.style.color = myRole === "GM" ? "#cc9a49" : "#aaa";
+            }
+
+            if (myRole === "GM") {
+                const consoleDiv = document.getElementById('gm-console');
+                if (consoleDiv) consoleDiv.classList.remove('hidden');
+                setupDMView();
+                setupGMEvents();
+            }
+
+            // Suscribirse a cambios
+            OBR.scene.onMetadataChange((metadata) => {
+                render(metadata[METADATA_KEY] || { inventories: {} });
+            });
+
+            // Render inicial
+            const metadata = await OBR.scene.getMetadata();
             render(metadata[METADATA_KEY] || { inventories: {} });
-        });
-
-        const metadata = await OBR.scene.getMetadata();
-        render(metadata[METADATA_KEY] || { inventories: {} });
+            
+        } catch (error) {
+            console.error("Error al conectar con Owlbear:", error);
+        }
     });
 }
+
+// Ejecutar init al cargar el script
+init();
 
 function setupUI() {
     const badge = document.getElementById('role-badge');

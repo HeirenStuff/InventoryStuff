@@ -5,8 +5,8 @@
     "description": "Inventario para mua",
     "action": {
         "title": "Inventory Stuff",
-        "icon": "icon.png",
-        "popover": "index.html",
+        "icon": "/icon.png",
+        "popover": "/index.html",
         "width": 380,
         "height": 650
     }
