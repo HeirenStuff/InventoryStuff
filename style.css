@@ -50,30 +50,29 @@ input, select {
     grid-template-columns: repeat(8, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background-color: var(--border-color);
-    width: 328px; /* (8 * 40px) + (8 * 1px gap) */
+    background-color: #444; /* Líneas más claras */
+    width: 328px;
     height: 409px;
-    margin: 0 auto;
+    margin: 10px auto;
     border: 2px solid var(--accent-gold);
-    position: relative; /* Necesario para posicionar ítems absolute */
+    position: relative;
+    overflow: hidden;
 }
 
 .slot {
     width: 40px;
     height: 40px;
-    background-color: var(--slot-enabled);
+    background-color: #1a1a1a;
     cursor: pointer;
-    box-sizing: border-box;
+}
+
+.slot.locked {
+    background-color: #050505;
+    background-image: repeating-linear-gradient(45deg, #000, #000 2px, transparent 2px, transparent 4px);
 }
 
 .slot:hover {
     background-color: #252525;
-}
-
-.slot.locked {
-    background-color: var(--slot-locked);
-    background-image: radial-gradient(var(--border-color) 1px, transparent 0);
-    background-size: 8px 8px; /* Efecto de zona bloqueada */
 }
 
 /* 4. ITEMS */
