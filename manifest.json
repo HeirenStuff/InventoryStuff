@@ -1,13 +1,14 @@
 {
+    "name": "RE Inventory & Coins",
+    "version": "1.0.0",
     "manifest_version": 1,
-    "name": "HB Inventory System",
-    "version": "1.0.1",
-    "description": "Inventario para mua",
+    "description": "Inventario estilo Resident Evil con contador de monedas",
+    "icon": "/icon.png",
     "action": {
-        "title": "Inventory Stuff",
-        "icon": "/icon.png",
-        "popover": "/index.html",
-        "width": 380,
-        "height": 650
+      "title": "Inventario",
+      "icon": "/icon.png",
+      "popover": "/index.html",
+      "width": 400,
+      "height": 600
     }
-}
+  }
