@@ -1,0 +1,12 @@
+{
+    "name": "obr-extension",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.html",
+    "dependencies": {
+      "@owlbear-rodeo/sdk": "latest"
+    },
+    "scripts": {
+      "build": "cp node_modules/@owlbear-rodeo/sdk/dist/obr-sdk.js ."
+    }
+  }
