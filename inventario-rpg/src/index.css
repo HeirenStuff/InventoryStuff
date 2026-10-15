@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #07080b;
+  --panel: #101218;
+  --panel-2: #161920;
+  --border: #2c303a;
+  --text: #eceef2;
+  --muted: #9aa1ae;
+  --accent: #9bb6cc;
+  --gold: #d4b978;
+  --ok: #7dba9a;
+  --danger: #d98989;
+  --focus: #b8cce0;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 0;
+  }
+}
+
+.rpg-panel {
+  @apply bg-[#101218] border border-[#2c303a] p-4 lg:p-5;
+}
+
+.rpg-card {
+  @apply bg-[#0c0e13] border border-[#2c303a] p-2.5 transition hover:border-[#4a5160];
+}
+
+.rpg-input {
+  @apply bg-[#0c0e13] border border-[#2c303a] px-3 py-2.5 text-sm text-[#eceef2] placeholder-[#6d7380] focus:outline-hidden focus:border-[#9bb6cc] transition;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#9bb6cc] hover:bg-[#b3c8da] text-[#0b1016] text-sm font-semibold px-3 py-2 active:scale-[0.98] transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#161920] hover:bg-[#1e232c] text-[#d5dae3] text-sm font-medium px-3 py-2 border border-[#2c303a] active:scale-[0.98] transition cursor-pointer;
+}
+
+.btn-success {
+  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#2a4a3c] hover:bg-[#355c4b] text-[#cfe8db] text-sm font-semibold px-3 py-2 border border-[#3d6a56] active:scale-[0.98] transition cursor-pointer disabled:opacity-40;
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#3a2224] hover:bg-[#4a2b2e] text-[#efc4c4] text-sm font-semibold px-3 py-2 border border-[#6a3d41] active:scale-[0.98] transition cursor-pointer;
+}
+
+.rpg-badge {
+  @apply text-xs font-mono font-bold px-1.5 py-0.5 border border-[#2c303a] bg-[#0c0e13] text-[#9aa1ae];
+}
+
+.coin-chip {
+  @apply flex flex-col items-center justify-center min-w-14 px-3 py-1.5 border border-[#2c303a] bg-[#0c0e13];
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 8px;
+}
+
+.section-title {
+  @apply text-xs font-bold uppercase tracking-[0.14em] text-[#9bb6cc];
+}

@@ -1,0 +1,14 @@
+//Importantes
+
+- Separar bases de datos para distintas campañas
+- Poder crear los jugadores fuera de la base de datos
+- Hacer subdominio unico para jugadores
+
+//Secundarios
+- que cuando estas un segundo con el mouse quieto encima del objeto te pase a la descripcion
+
+Hechos
+- Que cuando un item tiene precio en plata o cobre tambien lo marque dinamicamente
+- Que se actualice automaticamente en cada paso la aplicacion
+- Poder ver las cosas de los demas
+- Cualquier intercambio con tiendas que tenga confirmacion de compra o de venta
