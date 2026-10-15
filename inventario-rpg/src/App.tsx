@@ -18,6 +18,8 @@ export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const campanaParam = urlParams.get('campana');
   const forzarJugador = urlParams.get('rol') === 'jugador';
+  const personajeParam = urlParams.get('personaje');
+
 
   useEffect(() => {
     if (campanaParam) {
@@ -47,52 +49,59 @@ export default function App() {
   
   const recargarTodo = useCallback(async () => {
     try {
-      // 1. Cargar lista de campañas y resolver si la URL trajo nombre o ID
+      // 1. Cargar lista de campañas
       const { data: cData } = await supabase.from('campanas').select('*').order('nombre');
-      let idCampanaFinal = campanaActivaId;
-
       if (cData && cData.length > 0) {
         setCampanas(cData);
-
-        // Si en la URL escribieron un nombre corto (ej: "principal" o "strahd")
-        if (campanaParam) {
-          const encontrada = cData.find(
-            c => c.id === campanaParam || c.nombre.toLowerCase() === decodeURIComponent(campanaParam).toLowerCase()
-          );
-          if (encontrada) {
-            idCampanaFinal = encontrada.id;
-            setCampanaActivaId(encontrada.id);
-          }
-        }
       }
 
       // 2. Cargar datos principales
       const data = await inventoryApi.cargarDatosIniciales();
       setCatalogo(data.catalogo);
 
+      // 👉 AUTOLOGIN: Si la URL trae un personaje, buscarlo e iniciar sesión directo
+      let pjActual = personajeRef.current;
+      if (personajeParam && !pjActual) {
+        const nombreBuscado = decodeURIComponent(personajeParam).trim().toLowerCase();
+        const pjEncontrado = data.personajes.find(
+          p => p.id === personajeParam || p.nombre.trim().toLowerCase() === nombreBuscado
+        );
+
+        if (pjEncontrado) {
+          pjActual = pjEncontrado;
+          setPersonaje(pjEncontrado);
+          // Si el personaje pertenece a la campaña 01, sincronizar la campaña activa
+          if ((pjEncontrado as any).campana_id) {
+            setCampanaActivaId((pjEncontrado as any).campana_id);
+          }
+        }
+      }
+
+      const campanaFinal = (pjActual as any)?.campana_id || campanaActivaId;
+
       // 3. Filtrar por la campaña activa
-      setPersonajes(data.personajes.filter(p => (p as any).campana_id === idCampanaFinal));
-      setTiendas(data.tiendas.filter(t => (t as any).campana_id === idCampanaFinal));
-      setItemsMesa(data.mesa.filter(m => (m as any).campana_id === idCampanaFinal));
+      setPersonajes(data.personajes.filter(p => (p as any).campana_id === campanaFinal));
+      setTiendas(data.tiendas.filter(t => (t as any).campana_id === campanaFinal));
+      setItemsMesa(data.mesa.filter(m => (m as any).campana_id === campanaFinal));
 
       // 4. Solicitudes e inventarios grupales
       const sols = await inventoryApi.cargarSolicitudes();
-      setSolicitudes(sols.filter(s => (s.personaje as any)?.campana_id === campanaActivaId));
+      setSolicitudes(sols.filter(s => (s.personaje as any)?.campana_id === campanaFinal));
 
       const grupo = await inventoryApi.cargarInventariosGrupo();
       setInventariosGrupo(grupo);
 
-      // 5. Inventario de este jugador
-      if (personajeRef.current?.id) {
-        const miInv = await inventoryApi.cargarInventarioPersonaje(personajeRef.current.id);
+      // 5. Cargar la mochila del personaje activo
+      if (pjActual?.id) {
+        const miInv = await inventoryApi.cargarInventarioPersonaje(pjActual.id);
         setInventario(miInv);
-        const { data: pActual } = await supabase.from('personajes').select('*').eq('id', personajeRef.current.id).single();
-        if (pActual) setPersonaje(pActual);
+        const { data: pActualDB } = await supabase.from('personajes').select('*').eq('id', pjActual.id).single();
+        if (pActualDB) setPersonaje(pActualDB);
       }
     } catch (err) {
       console.error('Error al sincronizar partida:', err);
     }
-  }, [campanaActivaId]);
+  }, [campanaActivaId, personajeParam]);
 
   const recargarConDebounce = useCallback(() => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
