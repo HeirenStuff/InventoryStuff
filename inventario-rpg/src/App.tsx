@@ -47,10 +47,23 @@ export default function App() {
   
   const recargarTodo = useCallback(async () => {
     try {
-      // 1. Cargar lista de campañas
+      // 1. Cargar lista de campañas y resolver si la URL trajo nombre o ID
       const { data: cData } = await supabase.from('campanas').select('*').order('nombre');
+      let idCampanaFinal = campanaActivaId;
+
       if (cData && cData.length > 0) {
         setCampanas(cData);
+
+        // Si en la URL escribieron un nombre corto (ej: "principal" o "strahd")
+        if (campanaParam) {
+          const encontrada = cData.find(
+            c => c.id === campanaParam || c.nombre.toLowerCase() === decodeURIComponent(campanaParam).toLowerCase()
+          );
+          if (encontrada) {
+            idCampanaFinal = encontrada.id;
+            setCampanaActivaId(encontrada.id);
+          }
+        }
       }
 
       // 2. Cargar datos principales
@@ -58,9 +71,9 @@ export default function App() {
       setCatalogo(data.catalogo);
 
       // 3. Filtrar por la campaña activa
-      setPersonajes(data.personajes.filter(p => (p as any).campana_id === campanaActivaId));
-      setTiendas(data.tiendas.filter(t => (t as any).campana_id === campanaActivaId));
-      setItemsMesa(data.mesa.filter(m => (m as any).campana_id === campanaActivaId));
+      setPersonajes(data.personajes.filter(p => (p as any).campana_id === idCampanaFinal));
+      setTiendas(data.tiendas.filter(t => (t as any).campana_id === idCampanaFinal));
+      setItemsMesa(data.mesa.filter(m => (m as any).campana_id === idCampanaFinal));
 
       // 4. Solicitudes e inventarios grupales
       const sols = await inventoryApi.cargarSolicitudes();
