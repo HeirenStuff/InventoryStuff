@@ -7,7 +7,7 @@ import { MesaComun } from './MesaComun';
 import { StoreCard } from './StoreCard';
 import { 
   Crown, Globe, Backpack, LogOut, Plus, Edit2, Send, Trash2, ArrowRight, 
-  Coins, Archive, Minus, Sparkles, X, Check, XCircle, Clock, Copy 
+  Coins, Archive, Minus, Sparkles, X, Check, XCircle, Clock, Copy, User 
 } from 'lucide-react';
 
 const ICONOS_DISPONIBLES = [
@@ -60,6 +60,9 @@ export const VistaDM: React.FC<Props> = ({
   const [itemAEnviar, setItemAEnviar] = useState<ItemCatalogo | null>(null);
   const [modalItemDM, setModalItemDM] = useState<{ abierto: boolean; modo: 'crear' | 'editar'; item: FormItemState } | null>(null);
 
+  // Modal para copiar links con alias
+  const [modalLinksJugadores, setModalLinksJugadores] = useState(false);
+
   const [filtroCat, setFiltroCat] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [dmOro, setDmOro] = useState(50);
@@ -72,10 +75,16 @@ export const VistaDM: React.FC<Props> = ({
     i.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const handleCopiarLinkJugadores = () => {
-    const link = `${window.location.origin}${window.location.pathname}?campana=${campanaActivaId}&rol=jugador`;
+  const copiarEnlacePersonaje = (nombrePj?: string) => {
+    let link = `${window.location.origin}${window.location.pathname}?campana=${campanaActivaId}`;
+    if (nombrePj) {
+      link += `&personaje=${encodeURIComponent(nombrePj)}`;
+    } else {
+      link += `&rol=jugador`;
+    }
     navigator.clipboard.writeText(link);
-    alert('¡Enlace de jugadores copiado al portapapeles!');
+    alert(`¡Enlace copiado al portapapeles!\n\n${link}`);
+    setModalLinksJugadores(false);
   };
 
   const handleDropItemAJugadorDM = async (e: React.DragEvent, personajeId: string) => {
@@ -128,7 +137,6 @@ export const VistaDM: React.FC<Props> = ({
             <Crown className="w-4 h-4 text-[#9bb6cc]" /> Panel DM
           </h1>
 
-          {/* Selector de campaña en vivo para DM */}
           <select
             value={campanaActivaId}
             onChange={(e) => onCambiarCampana(e.target.value)}
@@ -160,14 +168,67 @@ export const VistaDM: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={handleCopiarLinkJugadores} className="btn-secondary text-xs flex items-center gap-1.5">
+          {/* EL MISMO BOTÓN DE SIEMPRE: AHORA ABRE LA VENTANA DE SELECCIÓN CON ALIAS */}
+          <button 
+            onClick={() => setModalLinksJugadores(true)} 
+            className="btn-secondary text-xs flex items-center gap-1.5"
+            title="Copiar links para los jugadores"
+          >
             <Copy className="w-3.5 h-3.5 text-[#7dba9a]" /> Copiar Link Jugadores
           </button>
+          
           <button onClick={onSalir} className="btn-secondary">
             <LogOut className="w-3.5 h-3.5" /> Salir
           </button>
         </div>
       </header>
+
+      {/* MODAL PARA COPIAR ENLACES CON ALIAS */}
+      {modalLinksJugadores && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="rpg-panel max-w-sm w-full space-y-3">
+            <div className="flex justify-between items-center border-b border-[#2c303a] pb-2">
+              <h3 className="font-semibold text-sm text-[#eceef2] flex items-center gap-2">
+                <Copy className="w-4 h-4 text-[#7dba9a]" /> Enlaces para Jugadores
+              </h3>
+              <button onClick={() => setModalLinksJugadores(false)}><X className="w-4 h-4 text-[#9aa1ae]" /></button>
+            </div>
+
+            <p className="text-xs text-[#9aa1ae]">
+              Toca un personaje para copiar su enlace directo personal:
+            </p>
+
+            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+              {personajes.length === 0 ? (
+                <p className="text-xs text-center py-4 text-[#9aa1ae]">No hay personajes creados todavía.</p>
+              ) : (
+                personajes.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => copiarEnlacePersonaje(p.nombre)}
+                    className="w-full flex items-center justify-between p-2.5 bg-[#0c0e13] hover:bg-[#161920] border border-[#2c303a] text-left hover:border-[#7dba9a] text-xs transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="w-3.5 h-3.5 text-[#9bb6cc]" />
+                      <span className="font-semibold text-[#eceef2]">{p.nombre}</span>
+                    </div>
+                    <span className="text-[11px] text-[#7dba9a] font-mono">Copiar link personal →</span>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-[#2c303a]">
+              <button
+                onClick={() => copiarEnlacePersonaje()}
+                className="w-full btn-secondary text-xs"
+              >
+                Copiar enlace general (para que ellos elijan)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PANEL DE SOLICITUDES PENDIENTES */}
       {solicitudes.length > 0 && (
