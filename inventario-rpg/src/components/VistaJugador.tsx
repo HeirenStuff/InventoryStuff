@@ -40,8 +40,18 @@ export const VistaJugador: React.FC<Props> = ({
   const [panelMovil, setPanelMovil] = useState<'inventario' | 'mesa' | 'tiendas'>('inventario');
   const [hoverMochila, setHoverMochila] = useState(false);
   const [hoverTiendaId, setHoverTiendaId] = useState<string | null>(null);
-  const [itemRegateo, setItemRegateo] = useState<{ ti: TiendaItem; tienda: Tienda; precioNormal: number } | null>(null);
-  const [ofertaRegateoPO, setOfertaRegateoPO] = useState<number>(0);
+  // Estado para modal de negociación / regateo (Compra y Venta)
+  const [negociacion, setNegociacion] = useState<{
+    tipo: 'compra' | 'venta';
+    tiendaId: string;
+    tiendaNombre: string;
+    item: { id: string; nombre: string; icono: string; precio_cobre: number };
+    tiendaItemId?: string;
+    inventarioId?: string;
+    precioBaseCobre: number;
+  } | null>(null);
+
+  const [ofertaCobre, setOfertaCobre] = useState<number>(0);
 
   const itemsMochila = useMemo(() => {
     return inventario
@@ -139,52 +149,59 @@ export const VistaJugador: React.FC<Props> = ({
     } catch (err) { console.error(err); }
   };
 
-  const handleDropVenderEnTienda = async (e: React.DragEvent) => {
+  const handleDropVenderEnTienda = (e: React.DragEvent) => {
     e.preventDefault();
+    const tiendaId = hoverTiendaId;
     setHoverTiendaId(null);
-    if (!hoverTiendaId) return;
+    if (!tiendaId) return;
 
     try {
       const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
       if (data.tipo === 'mochila') {
         const inv = inventario.find(i => i.id === data.inventarioId);
-        if (inv) {
-          const valorVenta = Math.round(inv.item.precio_cobre * 0.5);
-          await inventoryApi.crearSolicitud({
-            personaje_id: personaje.id,
-            tienda_id: hoverTiendaId,
-            item_id: inv.item.id,
-            inventario_id: inv.id,
-            tipo: 'venta',
-            precio_cobre: valorVenta,
-          });
-          onRecargar();
-        }
+        const tiendaDestino = tiendas.find(t => t.id === tiendaId);
+        if (!inv || !tiendaDestino) return;
+
+        // Precio base habitual de venta: 50%
+        const precioBase = Math.round(inv.item.precio_cobre * 0.5);
+
+        setNegociacion({
+          tipo: 'venta',
+          tiendaId: tiendaDestino.id,
+          tiendaNombre: tiendaDestino.nombre,
+          item: inv.item,
+          inventarioId: inv.id,
+          precioBaseCobre: precioBase,
+        });
+        setOfertaCobre(precioBase);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleComprarItemTienda = async (ti: TiendaItem, tienda: Tienda, precioOverride?: number) => {
-    const mult = tienda.multiplicador_precio ?? 1.0;
-    const precioBase = ti.precio_cobre_override ?? ti.item.precio_cobre;
-    const precioTotal = precioOverride !== undefined ? precioOverride : Math.round(precioBase * mult);
+  const handleConfirmarNegociacion = async () => {
+    if (!negociacion) return;
 
-    if (personaje.monedas_cobre < precioTotal) {
-      alert('No tienes suficientes monedas.');
+    if (negociacion.tipo === 'compra' && personaje.monedas_cobre < ofertaCobre) {
+      alert('No tienes suficientes monedas para hacer esa oferta.');
       return;
     }
 
     await inventoryApi.crearSolicitud({
       personaje_id: personaje.id,
-      tienda_id: ti.tienda_id,
-      item_id: ti.item.id,
-      tienda_item_id: ti.id,
-      tipo: 'compra',
-      precio_cobre: precioTotal,
+      tienda_id: negociacion.tiendaId,
+      item_id: negociacion.item.id,
+      tienda_item_id: negociacion.tiendaItemId,
+      inventario_id: negociacion.inventarioId,
+      tipo: negociacion.tipo,
+      precio_cobre: Math.max(0, ofertaCobre),
     });
-    setItemRegateo(null);
+
+    setNegociacion(null);
     onRecargar();
   };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#07080b] text-[#eceef2]">
@@ -460,7 +477,7 @@ export const VistaJugador: React.FC<Props> = ({
                       onDragOver={(e) => { e.preventDefault(); setHoverTiendaId(t.id); }}
                       onDragLeave={() => setHoverTiendaId(null)}
                       onDrop={handleDropVenderEnTienda}
-                      className={`p-3 border ${
+                      className={`p-3 border transition-colors ${
                         isHovered ? 'border-[#d4b978] bg-[#16140f]' : 'bg-[#0c0e13] border-[#2c303a]'
                       }`}
                     >
@@ -470,16 +487,16 @@ export const VistaJugador: React.FC<Props> = ({
                           <h4 className="font-semibold text-sm text-[#eceef2]">{t.nombre}</h4>
                         </div>
                         <span className="text-xs text-[#9aa1ae]">
-                          {isHovered ? 'Suelta para vender' : 'Comprar / vender'}
+                          {isHovered ? '¡Suelta aquí para negociar venta!' : 'Arrastra objetos aquí para vender'}
                         </span>
                       </div>
 
                       {items.length === 0 ? (
-                        <p className="text-sm text-[#9aa1ae] py-2 text-center">Sin artículos.</p>
+                        <p className="text-sm text-[#9aa1ae] py-2 text-center">Sin artículos en venta.</p>
                       ) : (
                         <div className="space-y-1">
                           {items.map(ti => {
-                            const mult = t.multiplicador_precio ?? 1.0;
+                            const mult = typeof t.multiplicador_precio === 'number' && t.multiplicador_precio > 0 ? t.multiplicador_precio : 1.0;
                             const precioBase = ti.precio_cobre_override ?? ti.item.precio_cobre;
                             const precioTotal = Math.round(precioBase * mult);
                             const saldoActual = personaje.monedas_cobre || 0;
@@ -502,21 +519,40 @@ export const VistaJugador: React.FC<Props> = ({
                                 </div>
 
                                 <div className="flex items-center gap-1.5 shrink-0">
+                                  {/* Botón para abrir regateo de compra con slider */}
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      setItemRegateo({ ti, tienda: t, precioNormal: precioTotal });
-                                      setOfertaRegateoPO(Math.floor(precioTotal / 100));
+                                      setNegociacion({
+                                        tipo: 'compra',
+                                        tiendaId: t.id,
+                                        tiendaNombre: t.nombre,
+                                        item: ti.item,
+                                        tiendaItemId: ti.id,
+                                        precioBaseCobre: precioTotal,
+                                      });
+                                      setOfertaCobre(precioTotal);
                                     }}
                                     className="btn-secondary py-1 px-2 text-xs"
-                                    title="Ofrecer otra cantidad al DM"
+                                    title="Regatear precio de compra"
                                   >
                                     Regatear
                                   </button>
 
+                                  {/* Compra directa al precio oficial */}
                                   <button
                                     disabled={!puedeComprar}
-                                    onClick={() => handleComprarItemTienda(ti, t)}
+                                    onClick={async () => {
+                                      await inventoryApi.crearSolicitud({
+                                        personaje_id: personaje.id,
+                                        tienda_id: t.id,
+                                        item_id: ti.item.id,
+                                        tienda_item_id: ti.id,
+                                        tipo: 'compra',
+                                        precio_cobre: precioTotal,
+                                      });
+                                      onRecargar();
+                                    }}
                                     className="btn-success py-1 px-2.5 text-xs"
                                   >
                                     {puedeComprar ? 'Comprar' : 'Sin oro'}
@@ -536,46 +572,91 @@ export const VistaJugador: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* MODAL REGATEAR */}
-      {itemRegateo && (
+      {/* MODAL DE NEGOCIACIÓN / REGATEO CON SLIDER (COMPRA Y VENTA) */}
+      {negociacion && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="rpg-panel max-w-xs w-full space-y-3">
-            <h3 className="section-title text-sm">Regatear / Ofertar</h3>
-            <p className="text-xs text-[#9aa1ae]">
-              Artículo: <strong className="text-[#eceef2]">{itemRegateo.ti.item.nombre}</strong>
-            </p>
-            <p className="text-xs text-[#9aa1ae]">
-              Precio oficial: <strong className="text-[#d4b978]">{formatearPrecio(itemRegateo.precioNormal)}</strong>
-            </p>
-
-            <div>
-              <label className="text-xs uppercase text-[#9aa1ae] block mb-1">Tu oferta en Oro (PO):</label>
-              <input
-                type="number"
-                min="0"
-                value={ofertaRegateoPO}
-                onChange={e => setOfertaRegateoPO(Math.max(0, parseInt(e.target.value) || 0))}
-                className="rpg-input text-center text-[#d4b978] font-mono font-bold w-full"
-              />
+          <div className="rpg-panel max-w-sm w-full space-y-4">
+            <div className="border-b border-[#2c303a] pb-2 flex justify-between items-center">
+              <h3 className="section-title text-sm flex items-center gap-1.5">
+                <ShoppingBag className="w-4 h-4 text-[#d4b978]" />
+                {negociacion.tipo === 'compra' ? 'Regatear Compra' : 'Negociar Venta'}
+              </h3>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase ${
+                negociacion.tipo === 'compra' ? 'bg-[#1a2a22] text-[#7dba9a]' : 'bg-[#2a1e14] text-[#d4b978]'
+              }`}>
+                {negociacion.tiendaNombre}
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <button 
-                type="button" 
-                onClick={() => setItemRegateo(null)} 
+            <div className="flex items-center gap-2.5 p-2 bg-[#0c0e13] border border-[#2c303a]">
+              <div className="p-2 border border-[#2c303a] bg-[#07080b] text-[#c5d4e4]">
+                <ItemIcon name={negociacion.item.icono} className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm text-[#eceef2] truncate">{negociacion.item.nombre}</p>
+                <p className="text-xs text-[#9aa1ae]">
+                  {negociacion.tipo === 'compra' ? 'Precio de lista: ' : 'Precio habitual (50%): '}
+                  <strong className="text-[#eceef2]">{formatearPrecio(negociacion.precioBaseCobre)}</strong>
+                </p>
+              </div>
+            </div>
+
+            {/* SECCIÓN DEL SLIDER Y VALOR OFERTADO */}
+            <div className="space-y-3 bg-[#0c0e13] p-3 border border-[#2c303a]">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-[#9aa1ae] uppercase tracking-wider font-semibold">Tu oferta propuesta:</span>
+                <span className="font-mono font-bold text-sm text-[#d4b978]">
+                  {formatearPrecio(ofertaCobre)}
+                </span>
+              </div>
+
+              {/* Slider de porcentaje interactivo (desde 10% hasta 200% del valor base) */}
+              <input
+                type="range"
+                min={Math.max(1, Math.round(negociacion.precioBaseCobre * 0.2))}
+                max={Math.round(negociacion.precioBaseCobre * 1.8)}
+                step={Math.max(1, Math.round(negociacion.precioBaseCobre * 0.05))}
+                value={ofertaCobre}
+                onChange={(e) => setOfertaCobre(Number(e.target.value))}
+                className="w-full cursor-pointer accent-[#d4b978]"
+              />
+
+              <div className="flex justify-between text-[11px] text-[#9aa1ae] font-mono">
+                <span>Más barato (-80%)</span>
+                <span>Base</span>
+                <span>Más caro (+80%)</span>
+              </div>
+
+              {/* Input numérico directo por si quieren ajustar en Piezas de Oro exactas */}
+              <div className="pt-2 border-t border-[#2c303a] flex items-center justify-between gap-2">
+                <span className="text-xs text-[#9aa1ae]">Ajustar en Oro (PO):</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={Math.floor(ofertaCobre / 100)}
+                  onChange={(e) => {
+                    const po = Math.max(0, parseInt(e.target.value) || 0);
+                    setOfertaCobre(po * 100 + (ofertaCobre % 100));
+                  }}
+                  className="w-24 rpg-input text-center font-mono font-bold text-xs text-[#d4b978]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setNegociacion(null)}
                 className="btn-secondary text-xs"
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const ofertaEnCobre = ofertaRegateoPO * 100;
-                  handleComprarItemTienda(itemRegateo.ti, itemRegateo.tienda, ofertaEnCobre);
-                }}
+                onClick={handleConfirmarNegociacion}
                 className="btn-primary text-xs"
               >
-                Enviar Oferta
+                Enviar al DM
               </button>
             </div>
           </div>
