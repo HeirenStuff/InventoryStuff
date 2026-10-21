@@ -365,19 +365,18 @@
 
 /* Fuente de texto de la pagina */
 
-/* 1. Fuente base rústica de pergamino para toda la app (muy legible) */
+/* Fuente limpia y moderna para toda la app (botones, inputs, descripciones) */
 body, button, input, select, textarea {
-  font-family: 'Alegreya', Georgia, serif;
-  font-size: 15px; /* Un punto más para facilitar la lectura */
+  font-family: 'Roboto', sans-serif !important;
 }
 
-/* 2. Fuente épica/oficial estilo D&D para títulos, cabeceras y nombres de paneles */
+/* Mantenemos los títulos estilo libro de D&D */
 h1, h2, h3, h4, .section-title {
   font-family: 'Cinzel', serif !important;
   letter-spacing: 0.04em;
 }
 
-/* 3. Mantenemos fuentes monoespaciadas limpias para los números de oro/peso */
+/* Números y valores monospaced */
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-family: ui-monospace, monospace !important;
 }
