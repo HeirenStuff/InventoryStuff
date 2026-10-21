@@ -1,16 +1,24 @@
 //Importantes
-- No funciona cuando elimino un objeto desde la app
 - Que cada jugador pueda hacer notas a un objeto (notas en objeto ya esta creado)
 - Apartado de "Notas" donde poder modificar y dejar anotaciones personales de jugador
 - Servicios como tal, no items, tipo peajes (esto tiene que ser del lado del jugador supongo? y otro del lado del dm que pueda pedir la cantidad que solicite yo)
-- Una conversion de libras a kilos
 - Filtros de precios o de peso
+- Categoria de common, uncommon y estas cosas
 - Tags a los items, fuera de la categoria
+- Sorting
+- Submenu para mandar a mesa, a otro jugador, estas cosas, para celu
+- Confirmacion al repartir monedas por si alguno no quiere aceptar
+- El repartir monedas te deje elegir a que jugadores
+- Tener jugadores inactivos que no cuenten para dar items y esto, si hay alguien que es jugador pasajero
+- Poder colocar un precio de un item como algo secreto, "a cotizar"
+- Poder colocar la descripcion de un item como "falta identificar"
 
 //Secundarios
+- Cambiar la fuente en compu, en celu se ve bien la fuente
 - que cuando estas un segundo con el mouse quieto encima del objeto te pase a la descripcion
 - Capaz el equipado este separado del resto?
 - Capaz venenos en su propia categoria
+- color de jugador segun clase, tambien kilos ahi
 
 Hechos
 - Editar y eliminar tiendas

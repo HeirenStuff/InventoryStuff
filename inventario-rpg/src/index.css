@@ -362,3 +362,9 @@
     gap: 6px !important;
   }
 }
+
+/* Fuente de texto de la pagina */
+
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
