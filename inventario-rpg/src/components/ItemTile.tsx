@@ -26,6 +26,7 @@ export const ItemTile: React.FC<Props> = ({
     e.dataTransfer.setData('text/plain', JSON.stringify({
       tipo: 'mochila',
       inventarioId: inv.id,
+      itemId: item.id,
       itemNombre: item.nombre,
     }));
   };

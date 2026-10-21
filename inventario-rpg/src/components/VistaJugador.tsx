@@ -149,20 +149,17 @@ export const VistaJugador: React.FC<Props> = ({
     } catch (err) { console.error(err); }
   };
 
-  const handleDropVenderEnTienda = (e: React.DragEvent) => {
+  const handleDropVenderEnTienda = (e: React.DragEvent, targetTiendaId: string) => {
     e.preventDefault();
-    const tiendaId = hoverTiendaId;
     setHoverTiendaId(null);
-    if (!tiendaId) return;
 
     try {
       const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
       if (data.tipo === 'mochila') {
         const inv = inventario.find(i => i.id === data.inventarioId);
-        const tiendaDestino = tiendas.find(t => t.id === tiendaId);
+        const tiendaDestino = tiendas.find(t => t.id === targetTiendaId);
         if (!inv || !tiendaDestino) return;
 
-        // Precio base habitual de venta: 50%
         const precioBase = Math.round(inv.item.precio_cobre * 0.5);
 
         setNegociacion({
@@ -476,7 +473,7 @@ export const VistaJugador: React.FC<Props> = ({
                       key={t.id}
                       onDragOver={(e) => { e.preventDefault(); setHoverTiendaId(t.id); }}
                       onDragLeave={() => setHoverTiendaId(null)}
-                      onDrop={handleDropVenderEnTienda}
+                      onDrop={(e) => handleDropVenderEnTienda(e, t.id)}
                       className={`p-3 border transition-colors ${
                         isHovered ? 'border-[#d4b978] bg-[#16140f]' : 'bg-[#0c0e13] border-[#2c303a]'
                       }`}
