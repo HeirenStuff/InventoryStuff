@@ -388,7 +388,7 @@ export const VistaJugador: React.FC<Props> = ({
                           <div>
                             <h4 className="font-bold text-sm text-[var(--text-main)]">{comp.nombre}</h4>
                             <p className="text-[11px] font-mono text-[var(--text-muted)]">
-                              Carga: {compPeso.toFixed(1)} / {comp.fuerza * 15} lbs
+                              Carga: {formatearPeso(compPeso)} / {formatearPeso(comp.fuerza * 15)}
                             </p>
                           </div>
                           <span className="text-xs font-mono text-[var(--accent-gold)] font-bold">
@@ -422,7 +422,7 @@ export const VistaJugador: React.FC<Props> = ({
                                     <span className="truncate font-semibold text-[var(--text-main)]">{inv.item.nombre}</span>
                                   </div>
                                   <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                                    {(inv.item.peso * inv.cantidad).toFixed(1)} lbs
+                                    {formatearPeso(inv.item.peso * inv.cantidad)}
                                   </span>
                                 </div>
                               );
