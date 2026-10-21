@@ -1,17 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #07080b;
-  --panel: #101218;
-  --panel-2: #161920;
-  --border: #2c303a;
-  --text: #eceef2;
-  --muted: #9aa1ae;
-  --accent: #9bb6cc;
-  --gold: #d4b978;
-  --ok: #7dba9a;
-  --danger: #d98989;
-  --focus: #b8cce0;
+  /* --- PALETA BASE GRIMORIO --- */
+  --bg-stone: #1a1a15;
+  --panel: #252520;
+  --panel-dark: #141410;
+  --border-color: #3d3d33;
+  --border-gold: #d1b181;
+  --accent-gold: #d1b181;
+  --accent-gold-dim: #a68d66;
+  --active-red: #800000;
+  --text-main: #e0d8c3;
+  --text-muted: #9c9483;
+
+  /* --- COLORES POR TIPO DE OBJETO (D&D) --- */
+  --type-weapon: #c25953;    /* Rojo herrería */
+  --type-armor: #738ba8;     /* Acero / Azul grisáceo */
+  --type-potion: #c44f77;    /* Magenta alquimia */
+  --type-scroll: #8ea35b;    /* Verde papiro / Mágico */
+  --type-ring: #dfa84a;      /* Oro / Joyería / Amuletos */
+  --type-wondrous: #9b6bc4;  /* Púrpura arcano (Varitas / Reliquias) */
+  --type-misc: #828078;      /* Gris piedra / Equipamiento común */
+
+  /* --- MONEDAS D&D --- */
+  --coin-cp: #b87333; /* Cobre */
+  --coin-sp: #b5c2c7; /* Plata */
+  --coin-ep: #8da499; /* Electro */
+  --coin-gp: #e5b73b; /* Oro */
+  --coin-pp: #e2e8f0; /* Platino */
 }
 
 @layer base {
@@ -20,69 +36,191 @@
   }
 
   body {
-    background-color: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-stone);
+    color: var(--text-main);
     min-height: 100vh;
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI', serif;
     font-size: 15px;
     line-height: 1.45;
   }
 
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-gold-dim);
+  }
+
   :focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-  }
-
-  button,
-  input,
-  select,
-  textarea {
-    border-radius: 0;
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 1px;
   }
 }
 
+/* ============================================================
+   COMPONENTES UI (GRIMORIO)
+   ============================================================ */
+
+/* Paneles contenedores */
 .rpg-panel {
-  @apply bg-[#101218] border border-[#2c303a] p-4 lg:p-5;
+  background: var(--panel);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  padding: 1rem;
 }
 
-.rpg-card {
-  @apply bg-[#0c0e13] border border-[#2c303a] p-2.5 transition hover:border-[#4a5160];
+/* Encabezados de sección tipo Grimorio */
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  border-bottom: 2px solid var(--accent-gold);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.rpg-input {
-  @apply bg-[#0c0e13] border border-[#2c303a] px-3 py-2.5 text-sm text-[#eceef2] placeholder-[#6d7380] focus:outline-hidden focus:border-[#9bb6cc] transition;
-}
-
+/* Botones */
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#9bb6cc] hover:bg-[#b3c8da] text-[#0b1016] text-sm font-semibold px-3 py-2 active:scale-[0.98] transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  padding: 6px 14px;
+  background: #111;
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: var(--accent-gold);
+  color: #111;
+  box-shadow: 0 0 12px rgba(209, 177, 129, 0.4);
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#161920] hover:bg-[#1e232c] text-[#d5dae3] text-sm font-medium px-3 py-2 border border-[#2c303a] active:scale-[0.98] transition cursor-pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  padding: 6px 14px;
+  background: var(--panel-dark);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-
-.btn-success {
-  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#2a4a3c] hover:bg-[#355c4b] text-[#cfe8db] text-sm font-semibold px-3 py-2 border border-[#3d6a56] active:scale-[0.98] transition cursor-pointer disabled:opacity-40;
+.btn-secondary:hover {
+  border-color: var(--accent-gold-dim);
+  color: var(--text-main);
 }
 
 .btn-danger {
-  @apply inline-flex items-center justify-center gap-1.5 min-h-9 bg-[#3a2224] hover:bg-[#4a2b2e] text-[#efc4c4] text-sm font-semibold px-3 py-2 border border-[#6a3d41] active:scale-[0.98] transition cursor-pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  background: rgba(128, 0, 0, 0.3);
+  color: #f0a8a8;
+  border: 1px solid var(--active-red);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-danger:hover {
+  background: var(--active-red);
+  color: #fff;
 }
 
+/* Inputs y Selects */
+.rpg-input {
+  background: var(--panel-dark);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.rpg-input:focus {
+  border-color: var(--accent-gold);
+}
+
+/* ============================================================
+   TARJETAS DE OBJETOS Y RANGOS POR COLOR
+   ============================================================ */
+
+.rpg-card {
+  --type-color: var(--border-color);
+  position: relative;
+  background: linear-gradient(135deg, rgba(37, 37, 32, 0.95), rgba(20, 20, 16, 0.98));
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--type-color);
+  padding: 10px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.rpg-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border-color: var(--accent-gold-dim);
+  border-left-color: var(--type-color);
+}
+
+/* Clases por tipo de ítem para asignar en el HTML/React */
+.item-weapon   { --type-color: var(--type-weapon); }
+.item-armor    { --type-color: var(--type-armor); }
+.item-potion   { --type-color: var(--type-potion); }
+.item-scroll   { --type-color: var(--type-scroll); }
+.item-ring     { --type-color: var(--type-ring); }
+.item-wondrous { --type-color: var(--type-wondrous); }
+.item-misc     { --type-color: var(--type-misc); }
+
+/* Badges de atributos y peso */
 .rpg-badge {
-  @apply text-xs font-mono font-bold px-1.5 py-0.5 border border-[#2c303a] bg-[#0c0e13] text-[#9aa1ae];
+  font-size: 0.7rem;
+  font-family: monospace;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--panel-dark);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
 }
 
+/* Monedas de D&D */
 .coin-chip {
-  @apply flex flex-col items-center justify-center min-w-14 px-3 py-1.5 border border-[#2c303a] bg-[#0c0e13];
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 55px;
+  padding: 4px 8px;
+  background: var(--panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
 }
-
-.slot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 8px;
-}
-
-.section-title {
-  @apply text-xs font-bold uppercase tracking-[0.14em] text-[#9bb6cc];
-}
+.coin-chip.cp { border-bottom: 2px solid var(--coin-cp); color: var(--coin-cp); }
+.coin-chip.sp { border-bottom: 2px solid var(--coin-sp); color: var(--coin-sp); }
+.coin-chip.ep { border-bottom: 2px solid var(--coin-ep); color: var(--coin-ep); }
+.coin-chip.gp { border-bottom: 2px solid var(--coin-gp); color: var(--coin-gp); }
+.coin-chip.pp { border-bottom: 2px solid var(--coin-pp); color: var(--coin-pp); }
