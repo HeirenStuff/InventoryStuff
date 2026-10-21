@@ -202,38 +202,59 @@
 /* ============================================================
    1. PALETAS DE COLOR PURAS Y SATURADAS (Fórmula Track-Card)
    ============================================================ */
-.item-weapon,
-[class*="item-weapon"] { 
+/* ============================================================
+   PALETAS DE COLOR VIVAS (Sistema de 9 Categorías D&D)
+   ============================================================ */
+/* 1. Armas: Carmesí Forja */
+.item-weapon, [class*="item-weapon"] { 
   --t-color-1: #e63946 !important; 
   --t-color-2: #7a121d !important; 
 }
-.item-armor,
-[class*="item-armor"] { 
+
+/* 2. Armaduras: Azul Cobalto Acero */
+.item-armor, [class*="item-armor"] { 
   --t-color-1: #3a86ff !important; 
   --t-color-2: #103778 !important; 
 }
-.item-potion,
-[class*="item-potion"] { 
+
+/* 3. Munición: Naranja Táctico / Balística */
+.item-ammo, [class*="item-ammo"] { 
+  --t-color-1: #fb8500 !important; 
+  --t-color-2: #803a00 !important; 
+}
+
+/* 4. Alimentos y Bebidas: Verde Olivo / Campestre */
+.item-food, [class*="item-food"] { 
+  --t-color-1: #8cb369 !important; 
+  --t-color-2: #436625 !important; 
+}
+
+/* 5. Pociones: Magenta Alquímico Vibrante */
+.item-potion, [class*="item-potion"] { 
   --t-color-1: #ff007f !important; 
   --t-color-2: #7a003c !important; 
 }
-.item-scroll,
-[class*="item-scroll"] { 
-  --t-color-1: #2ec4b6 !important; 
-  --t-color-2: #0e524b !important; 
+
+/* 6. Magia y Pergaminos: Cian Arcano / Rúnico */
+.item-magic, [class*="item-magic"] { 
+  --t-color-1: #00f5d4 !important; 
+  --t-color-2: #026b5d !important; 
 }
-.item-ring,
-[class*="item-ring"] { 
+
+/* 7. Herramientas: Ocre / Bronce de Forja */
+.item-tool, [class*="item-tool"] { 
+  --t-color-1: #d4a373 !important; 
+  --t-color-2: #6c4b26 !important; 
+}
+
+/* 8. Tesoros: Oro Brillante / Gemas */
+.item-treasure, [class*="item-treasure"] { 
   --t-color-1: #ffb703 !important; 
   --t-color-2: #805b00 !important; 
 }
-.item-wondrous,
-[class*="item-wondrous"] { 
-  --t-color-1: #9d4edd !important; 
-  --t-color-2: #43126b !important; 
-}
-.item-misc,
-[class*="item-misc"] { 
+
+/* 9. Equipo y Supervivencia: Piedra / Cuero */
+.item-equipo, [class*="item-equipo"], .item-misc { 
   --t-color-1: #8a8f99 !important; 
   --t-color-2: #36393f !important; 
 }

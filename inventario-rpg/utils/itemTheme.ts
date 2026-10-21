@@ -1,47 +1,38 @@
 // src/utils/itemTheme.ts
 
-/**
- * Acepta tanto un string directo ("arma") como el objeto item completo ({ categoria: "arma", ... })
- */
 export const getItemTypeClass = (itemOrType?: any): string => {
-  if (!itemOrType) return 'item-misc';
+  if (!itemOrType) return 'item-equipo';
 
-  // Si pasaron el objeto completo, busca las propiedades habituales; si no, asume que es el string
-  const raw = typeof itemOrType === 'string' 
-    ? itemOrType 
-    : (itemOrType.categoria || itemOrType.tipo || itemOrType.category || itemOrType.tipo_item || '');
+  const raw = typeof itemOrType === 'string'
+    ? itemOrType
+    : (itemOrType.categoria || itemOrType.tipo || itemOrType.category || '');
 
   const t = String(raw).toLowerCase().trim();
 
-  // Armas
-  if (t.includes('arma') || t.includes('weapon') || t.includes('espada') || t.includes('arco')) {
-    return 'item-weapon';
-  }
+  // 1. ARMAS
+  if (t === 'arma' || t.includes('arma') || t.includes('weapon')) return 'item-weapon';
 
-  // Armaduras y Escudos
-  if (t.includes('armadura') || t.includes('armor') || t.includes('escudo') || t.includes('shield')) {
-    return 'item-armor';
-  }
+  // 2. ARMADURAS
+  if (t === 'armadura' || t.includes('armor') || t.includes('escudo')) return 'item-armor';
 
-  // Pociones y Alquimia
-  if (t.includes('pocion') || t.includes('poción') || t.includes('potion') || t.includes('veneno')) {
-    return 'item-potion';
-  }
+  // 3. MUNICIÓN (Nuevo)
+  if (t === 'municion' || t.includes('flecha') || t.includes('virote') || t.includes('bala')) return 'item-ammo';
 
-  // Pergaminos y Libros
-  if (t.includes('pergamino') || t.includes('scroll') || t.includes('libro') || t.includes('tomo')) {
-    return 'item-scroll';
-  }
+  // 4. ALIMENTOS Y BEBIDAS (Nuevo)
+  if (t === 'alimento' || t.includes('comida') || t.includes('racion') || t.includes('bebida')) return 'item-food';
 
-  // Joyería y Anillos
-  if (t.includes('anillo') || t.includes('ring') || t.includes('joya') || t.includes('amuleto')) {
-    return 'item-ring';
-  }
+  // 5. POCIONES Y VENENOS
+  if (t === 'pocion' || t.includes('potion') || t.includes('alquimia')) return 'item-potion';
 
-  // Varitas y Objetos mágicos
-  if (t.includes('varita') || t.includes('wand') || t.includes('bastón') || t.includes('staff') || t.includes('magico') || t.includes('mágico') || t.includes('wondrous')) {
-    return 'item-wondrous';
-  }
+  // 6. MAGIA, PERGAMINOS Y RUNAS
+  if (t === 'magia' || t.includes('scroll') || t.includes('libro') || t.includes('hechizo')) return 'item-magic';
 
-  return 'item-misc';
+  // 7. HERRAMIENTAS E INSTRUMENTOS
+  if (t === 'herramienta' || t.includes('tool') || t.includes('instrumento')) return 'item-tool';
+
+  // 8. TESOROS Y JOYAS
+  if (t === 'tesoro' || t.includes('gem') || t.includes('oro') || t.includes('joya')) return 'item-treasure';
+
+  // 9. EQUIPO GENERAL / POR DEFECTO
+  return 'item-equipo';
 };
