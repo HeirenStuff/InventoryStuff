@@ -104,6 +104,26 @@ export const inventoryApi = {
     if (error) throw error;
   },
 
+  // Añadir dentro de export const inventoryApi = { ... }
+
+  actualizarTienda: async (tiendaId: string, nombre: string) => {
+    const { error } = await supabase
+      .from('tiendas')
+      .update({ nombre: nombre.trim() })
+      .eq('id', tiendaId);
+    if (error) throw error;
+  },
+
+  eliminarTienda: async (tiendaId: string) => {
+    // 1. Limpiar solicitudes pendientes vinculadas a esta tienda
+    await supabase.from('solicitudes_tienda').delete().eq('tienda_id', tiendaId);
+    // 2. Limpiar inventario de la tienda
+    await supabase.from('tienda_items').delete().eq('tienda_id', tiendaId);
+    // 3. Eliminar la tienda
+    const { error } = await supabase.from('tiendas').delete().eq('id', tiendaId);
+    if (error) throw error;
+  },
+
   cargarInventarioPersonaje: async (personajeId: string) => {
     const { data } = await supabase
       .from('inventarios')
@@ -398,8 +418,14 @@ export const inventoryApi = {
     await supabase.from('tiendas').update({ abierta: !actual }).eq('id', tiendaId);
   },
 
-  crearTienda: async (nombre: string) => {
-    await supabase.from('tiendas').insert([{ nombre: nombre.trim(), abierta: true, multiplicador_precio: 1.0 }]);
+  crearTienda: async (nombre: string, campanaId: string) => {
+    const { error } = await supabase.from('tiendas').insert([{ 
+      nombre: nombre.trim(), 
+      abierta: true, 
+      multiplicador_precio: 1.0,
+      campana_id: campanaId // 👈 Toma la campaña que le pasa la vista en ese momento
+    }]);
+    if (error) throw error;
   },
 
   cargarSolicitudes: async (): Promise<SolicitudTienda[]> => {

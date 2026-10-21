@@ -1,8 +1,6 @@
 //Importantes
-
-- Separar bases de datos para distintas campañas
-- Poder crear los jugadores fuera de la base de datos
-- Hacer subdominio unico para jugadores
+- Editar y eliminar tiendas
+- Poder regatear precios individuales
 
 //Secundarios
 - que cuando estas un segundo con el mouse quieto encima del objeto te pase a la descripcion
@@ -12,3 +10,7 @@ Hechos
 - Que se actualice automaticamente en cada paso la aplicacion
 - Poder ver las cosas de los demas
 - Cualquier intercambio con tiendas que tenga confirmacion de compra o de venta
+- Separar bases de datos para distintas campañas
+- Poder crear los jugadores fuera de la base de datos
+- Hacer subdominio unico para jugadores
+

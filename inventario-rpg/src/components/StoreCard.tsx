@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Tienda, TiendaItem } from '../types';
 import { ItemIcon, formatearPrecio, inventoryApi } from '../services/inventoryApi';
-import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight } from 'lucide-react';
+import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight, Edit2, Check, X } from 'lucide-react';
 
 interface Props {
   tienda: Tienda;
@@ -11,6 +11,8 @@ interface Props {
 export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
   const [expandido, setExpandido] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [nuevoNombre, setNuevoNombre] = useState(tienda.nombre);
 
   const handleDropEnTienda = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -42,6 +44,20 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
     onActualizar();
   };
 
+  const handleGuardarNombre = async () => {
+    if (!nuevoNombre.trim()) return;
+    await inventoryApi.actualizarTienda(tienda.id, nuevoNombre);
+    setEditando(false);
+    onActualizar();
+  };
+
+  const handleEliminarTienda = async () => {
+    if (confirm(`¿Estás seguro de que quieres eliminar la tienda "${tienda.nombre}" y todo su stock?`)) {
+      await inventoryApi.eliminarTienda(tienda.id);
+      onActualizar();
+    }
+  };
+
   const items = tienda.items || [];
 
   return (
@@ -56,35 +72,96 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
       }`}
     >
       <div className="p-3 flex justify-between items-center gap-2 border-b border-[#2c303a] bg-[#0c0e13]">
-        <button
-          type="button"
-          onClick={() => setExpandido(!expandido)}
-          className="flex items-center gap-2.5 text-left flex-1 min-w-0"
-          aria-expanded={expandido}
-        >
-          <div className={`p-2 border ${tienda.abierta ? 'bg-[#1a2a22] border-[#3d6a56] text-[#7dba9a]' : 'bg-[#161920] border-[#2c303a] text-[#6d7380]'}`}>
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <div className={`p-2 border shrink-0 ${tienda.abierta ? 'bg-[#1a2a22] border-[#3d6a56] text-[#7dba9a]' : 'bg-[#161920] border-[#2c303a] text-[#6d7380]'}`}>
             <Store className="w-4 h-4" />
           </div>
-          <div className="min-w-0">
-            <h3 className="font-semibold text-sm text-[#eceef2] truncate">
-              {tienda.nombre}
-              <span className="text-xs font-mono text-[#9aa1ae] font-normal ml-1.5">({items.length})</span>
-            </h3>
-            <p className="text-xs text-[#9aa1ae]">
-              {isHovered ? 'Suelta para añadir stock' : tienda.abierta ? 'Abierta para el grupo' : 'Oculta'}
-            </p>
-          </div>
-        </button>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+          {editando ? (
+            <div className="flex items-center gap-1.5 flex-1">
+              <input
+                type="text"
+                value={nuevoNombre}
+                onChange={(e) => setNuevoNombre(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleGuardarNombre();
+                  if (e.key === 'Escape') setEditando(false);
+                }}
+                className="rpg-input text-xs py-1 px-2 flex-1"
+                autoFocus
+              />
+              <button 
+                type="button" 
+                onClick={handleGuardarNombre} 
+                className="btn-success p-1 min-h-8 min-w-8 flex items-center justify-center"
+                title="Guardar nombre"
+              >
+                <Check className="w-3.5 h-3.5" />
+              </button>
+              <button 
+                type="button" 
+                onClick={() => { setNuevoNombre(tienda.nombre); setEditando(false); }} 
+                className="btn-secondary p-1 min-h-8 min-w-8 flex items-center justify-center"
+                title="Cancelar"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setExpandido(!expandido)}
+              className="text-left flex-1 min-w-0 cursor-pointer"
+              aria-expanded={expandido}
+            >
+              <h3 className="font-semibold text-sm text-[#eceef2] truncate">
+                {tienda.nombre}
+                <span className="text-xs font-mono text-[#9aa1ae] font-normal ml-1.5">({items.length})</span>
+              </h3>
+              <p className="text-xs text-[#9aa1ae]">
+                {isHovered ? 'Suelta para añadir stock' : tienda.abierta ? 'Abierta para el grupo' : 'Oculta'}
+              </p>
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          {!editando && (
+            <>
+              <button
+                type="button"
+                onClick={() => setEditando(true)}
+                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]"
+                title="Editar nombre"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleEliminarTienda}
+                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]"
+                title="Eliminar tienda"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
+
           <button
             type="button"
             onClick={() => { inventoryApi.toggleTiendaAbierta(tienda.id, tienda.abierta).then(onActualizar); }}
-            className={tienda.abierta ? 'btn-danger py-1.5 text-xs' : 'btn-success py-1.5 text-xs'}
+            className={tienda.abierta ? 'btn-danger py-1 px-2 text-xs' : 'btn-success py-1 px-2 text-xs'}
           >
             {tienda.abierta ? 'Cerrar' : 'Abrir'}
           </button>
-          <button type="button" onClick={() => setExpandido(!expandido)} className="min-h-9 min-w-9 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]" aria-label={expandido ? 'Contraer tienda' : 'Expandir tienda'}>
+
+          <button 
+            type="button" 
+            onClick={() => setExpandido(!expandido)} 
+            className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]" 
+            aria-label={expandido ? 'Contraer tienda' : 'Expandir tienda'}
+          >
             {expandido ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>

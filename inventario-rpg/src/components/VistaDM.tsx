@@ -430,7 +430,17 @@ export const VistaDM: React.FC<Props> = ({
                     onChange={e => setNuevaTiendaNombre(e.target.value)}
                     className="rpg-input py-1 w-28 text-xs"
                   />
-                  <button onClick={() => { inventoryApi.crearTienda(nuevaTiendaNombre).then(() => { setNuevaTiendaNombre(''); onRecargar(); }); }} className="btn-success py-1 px-2.5">
+                  <button 
+                    onClick={() => { 
+                      if (!nuevaTiendaNombre.trim()) return;
+                      // Pasa el nombre y la campaña que el DM tiene seleccionada en el select del header
+                      inventoryApi.crearTienda(nuevaTiendaNombre, campanaActivaId).then(() => { 
+                        setNuevaTiendaNombre(''); 
+                        onRecargar(); 
+                      }); 
+                    }} 
+                    className="btn-success py-1 px-2.5"
+                  >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
