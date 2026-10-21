@@ -20,7 +20,6 @@ export const ItemTile: React.FC<Props> = ({
   onMoverBaul,
 }) => {
   const { item, cantidad, equipado, es_secreto, en_baul } = inv;
-  const pesoTotal = (item.peso * cantidad).toFixed(1);
   const [detalle, setDetalle] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {
