@@ -327,19 +327,17 @@
    FILTROS POR ENCIMA: SECRETO Y BAÚL
    ============================================================ */
 
-/* SECRETO: Filtro morado etéreo desaturado y borde punteado */
+/* Objeto SECRETO: Filtro morado etéreo desaturado */
 .rpg-card[class*="bg-[#18131d]"],
-.rpg-card:has([title="Secreto"]),
-.rpg-card:has(.lucide-eye-off) {
+.rpg-card:has(button[title="Secreto"]) {
   filter: saturate(0.55) brightness(0.7) hue-rotate(260deg) !important;
   border-style: dashed !important;
   border-color: #9b6bc4 !important;
 }
 
-/* BAÚL: Filtro frío de almacenamiento */
+/* Objeto en el BAÚL: Filtro de almacenamiento */
 .rpg-card[class*="bg-[#14181f]"],
-.rpg-card:has([title="Mover a la mochila"]),
-.rpg-card:has(.lucide-package) {
+.rpg-card:has(button[title="Mover a la mochila"]) {
   filter: saturate(0.45) brightness(0.65) !important;
   opacity: 0.85;
 }
