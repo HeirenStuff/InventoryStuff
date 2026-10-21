@@ -40,6 +40,8 @@ export const VistaJugador: React.FC<Props> = ({
   const [panelMovil, setPanelMovil] = useState<'inventario' | 'mesa' | 'tiendas'>('inventario');
   const [hoverMochila, setHoverMochila] = useState(false);
   const [hoverTiendaId, setHoverTiendaId] = useState<string | null>(null);
+  const [itemRegateo, setItemRegateo] = useState<{ ti: TiendaItem; tienda: Tienda; precioNormal: number } | null>(null);
+  const [ofertaRegateoPO, setOfertaRegateoPO] = useState<number>(0);
 
   const itemsMochila = useMemo(() => {
     return inventario
@@ -162,8 +164,11 @@ export const VistaJugador: React.FC<Props> = ({
     } catch (err) { console.error(err); }
   };
 
-  const handleComprarItemTienda = async (ti: TiendaItem) => {
-    const precioTotal = ti.precio_cobre_override ?? ti.item.precio_cobre;
+  const handleComprarItemTienda = async (ti: TiendaItem, tienda: Tienda, precioOverride?: number) => {
+    const mult = tienda.multiplicador_precio ?? 1.0;
+    const precioBase = ti.precio_cobre_override ?? ti.item.precio_cobre;
+    const precioTotal = precioOverride !== undefined ? precioOverride : Math.round(precioBase * mult);
+
     if (personaje.monedas_cobre < precioTotal) {
       alert('No tienes suficientes monedas.');
       return;
@@ -177,6 +182,7 @@ export const VistaJugador: React.FC<Props> = ({
       tipo: 'compra',
       precio_cobre: precioTotal,
     });
+    setItemRegateo(null);
     onRecargar();
   };
 
@@ -473,7 +479,9 @@ export const VistaJugador: React.FC<Props> = ({
                       ) : (
                         <div className="space-y-1">
                           {items.map(ti => {
-                            const precioTotal = ti.precio_cobre_override ?? ti.item.precio_cobre;
+                            const mult = t.multiplicador_precio ?? 1.0;
+                            const precioBase = ti.precio_cobre_override ?? ti.item.precio_cobre;
+                            const precioTotal = Math.round(precioBase * mult);
                             const saldoActual = personaje.monedas_cobre || 0;
                             const puedeComprar = saldoActual >= precioTotal && (ti.stock === null || ti.stock > 0);
 
@@ -493,13 +501,27 @@ export const VistaJugador: React.FC<Props> = ({
                                   </div>
                                 </div>
 
-                                <button
-                                  disabled={!puedeComprar}
-                                  onClick={() => handleComprarItemTienda(ti)}
-                                  className="btn-success py-1.5 px-2.5 text-xs shrink-0"
-                                >
-                                  {puedeComprar ? 'Comprar' : 'Sin oro'}
-                                </button>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setItemRegateo({ ti, tienda: t, precioNormal: precioTotal });
+                                      setOfertaRegateoPO(Math.floor(precioTotal / 100));
+                                    }}
+                                    className="btn-secondary py-1 px-2 text-xs"
+                                    title="Ofrecer otra cantidad al DM"
+                                  >
+                                    Regatear
+                                  </button>
+
+                                  <button
+                                    disabled={!puedeComprar}
+                                    onClick={() => handleComprarItemTienda(ti, t)}
+                                    className="btn-success py-1 px-2.5 text-xs"
+                                  >
+                                    {puedeComprar ? 'Comprar' : 'Sin oro'}
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
@@ -513,6 +535,52 @@ export const VistaJugador: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
+      {/* MODAL REGATEAR */}
+      {itemRegateo && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="rpg-panel max-w-xs w-full space-y-3">
+            <h3 className="section-title text-sm">Regatear / Ofertar</h3>
+            <p className="text-xs text-[#9aa1ae]">
+              Artículo: <strong className="text-[#eceef2]">{itemRegateo.ti.item.nombre}</strong>
+            </p>
+            <p className="text-xs text-[#9aa1ae]">
+              Precio oficial: <strong className="text-[#d4b978]">{formatearPrecio(itemRegateo.precioNormal)}</strong>
+            </p>
+
+            <div>
+              <label className="text-xs uppercase text-[#9aa1ae] block mb-1">Tu oferta en Oro (PO):</label>
+              <input
+                type="number"
+                min="0"
+                value={ofertaRegateoPO}
+                onChange={e => setOfertaRegateoPO(Math.max(0, parseInt(e.target.value) || 0))}
+                className="rpg-input text-center text-[#d4b978] font-mono font-bold w-full"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <button 
+                type="button" 
+                onClick={() => setItemRegateo(null)} 
+                className="btn-secondary text-xs"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const ofertaEnCobre = ofertaRegateoPO * 100;
+                  handleComprarItemTienda(itemRegateo.ti, itemRegateo.tienda, ofertaEnCobre);
+                }}
+                className="btn-primary text-xs"
+              >
+                Enviar Oferta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

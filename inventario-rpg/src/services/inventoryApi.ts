@@ -492,6 +492,14 @@ export const inventoryApi = {
     await supabase.from('solicitudes_tienda').delete().eq('id', solicitudId);
   },
 
+  actualizarMultiplicadorTienda: async (tiendaId: string, multiplicador: number) => {
+    const { error } = await supabase
+      .from('tiendas')
+      .update({ multiplicador_precio: Math.max(0, multiplicador) })
+      .eq('id', tiendaId);
+    if (error) throw error;
+  },
+
   crearPersonaje: async (payload: {
     nombre: string;
     fuerza: number;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Tienda, TiendaItem } from '../types';
 import { ItemIcon, formatearPrecio, inventoryApi } from '../services/inventoryApi';
-import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight, Edit2, Check, X } from 'lucide-react';
+import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight, Edit2, Check, X, Percent } from 'lucide-react';
 
 interface Props {
   tienda: Tienda;
@@ -13,6 +13,9 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState(tienda.nombre);
+  const [multInput, setMultInput] = useState<number>(tienda.multiplicador_precio ?? 1.0);
+
+  const multTienda = tienda.multiplicador_precio ?? 1.0;
 
   const handleDropEnTienda = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -58,6 +61,12 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
     }
   };
 
+  const handleCambiarMultiplicador = async (nuevoMult: number) => {
+    setMultInput(nuevoMult);
+    await inventoryApi.actualizarMultiplicadorTienda(tienda.id, nuevoMult);
+    onActualizar();
+  };
+
   const items = tienda.items || [];
 
   return (
@@ -94,7 +103,6 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                 type="button" 
                 onClick={handleGuardarNombre} 
                 className="btn-success p-1 min-h-8 min-w-8 flex items-center justify-center"
-                title="Guardar nombre"
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
@@ -102,7 +110,6 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                 type="button" 
                 onClick={() => { setNuevoNombre(tienda.nombre); setEditando(false); }} 
                 className="btn-secondary p-1 min-h-8 min-w-8 flex items-center justify-center"
-                title="Cancelar"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -126,6 +133,21 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          {/* CONTROL MULTIPLICADOR */}
+          <div className="flex items-center gap-1 bg-[#07080b] border border-[#2c303a] px-1.5 py-0.5 rounded text-xs" title="Modificador de precio (Ej: 0.5 = Mitad de precio)">
+            <Percent className="w-3 h-3 text-[#d4b978]" />
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              value={multInput}
+              onChange={(e) => setMultInput(parseFloat(e.target.value) || 0)}
+              onBlur={(e) => handleCambiarMultiplicador(parseFloat(e.target.value) || 1.0)}
+              className="w-11 bg-transparent text-center font-mono font-bold text-[#d4b978] outline-none"
+            />
+          </div>
+
           {!editando && (
             <>
               <button
@@ -159,8 +181,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
           <button 
             type="button" 
             onClick={() => setExpandido(!expandido)} 
-            className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]" 
-            aria-label={expandido ? 'Contraer tienda' : 'Expandir tienda'}
+            className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]"
           >
             {expandido ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
@@ -176,6 +197,8 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
           ) : (
             items.map((tItem) => {
               const agotado = tItem.stock !== null && tItem.stock <= 0;
+              const precioBase = tItem.precio_cobre_override ?? tItem.item.precio_cobre;
+              const precioCalculado = Math.round(precioBase * multTienda);
 
               return (
                 <div key={tItem.id} className={`flex items-center justify-between gap-2 p-2 border text-sm ${agotado ? 'opacity-50 border-[#2c303a] bg-[#0c0e13]' : 'border-[#2c303a] bg-[#0c0e13]'}`}>
@@ -184,7 +207,10 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                     <div className="min-w-0">
                       <p className="font-semibold text-[#eceef2] truncate">{tItem.item.nombre}</p>
                       <p className="text-xs text-[#d4b978] font-mono">
-                        {formatearPrecio(tItem.precio_cobre_override ?? tItem.item.precio_cobre)}
+                        {formatearPrecio(precioCalculado)}
+                        {multTienda !== 1.0 && (
+                          <span className="text-[10px] text-[#9aa1ae] ml-1">({multTienda}x)</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -192,11 +218,11 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                   <div className="flex items-center gap-1 shrink-0">
                     {tItem.stock !== null ? (
                       <div className="flex items-center border border-[#2c303a] text-xs font-mono">
-                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, -1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]" aria-label="Bajar stock">
+                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, -1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]">
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <span className="font-bold w-6 text-center">{tItem.stock}</span>
-                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, 1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#7dba9a]" aria-label="Subir stock">
+                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, 1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#7dba9a]">
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -204,10 +230,10 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                       <span className="text-xs text-[#9aa1ae] font-mono px-2">∞</span>
                     )}
 
-                    <button type="button" onClick={() => handleMandarAMesa(tItem)} title="Tirar 1 a la mesa" aria-label="Enviar uno a la mesa" className="min-h-8 min-w-8 inline-flex items-center justify-center border border-[#2c303a] text-[#c5d4e4] hover:bg-[#161920]">
+                    <button type="button" onClick={() => handleMandarAMesa(tItem)} title="Tirar 1 a la mesa" className="min-h-8 min-w-8 inline-flex items-center justify-center border border-[#2c303a] text-[#c5d4e4] hover:bg-[#161920]">
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
-                    <button type="button" onClick={() => inventoryApi.eliminarDeTienda(tItem.id).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]" aria-label="Quitar de la tienda">
+                    <button type="button" onClick={() => inventoryApi.eliminarDeTienda(tItem.id).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
