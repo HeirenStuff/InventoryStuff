@@ -610,8 +610,8 @@ export const VistaJugador: React.FC<Props> = ({
               {/* Slider de porcentaje interactivo (desde 10% hasta 200% del valor base) */}
               <input
                 type="range"
-                min={Math.max(1, Math.round(negociacion.precioBaseCobre * 0.2))}
-                max={Math.round(negociacion.precioBaseCobre * 1.8)}
+                min={0}
+                max={Math.round(negociacion.precioBaseCobre * 2)}
                 step={Math.max(1, Math.round(negociacion.precioBaseCobre * 0.05))}
                 value={ofertaCobre}
                 onChange={(e) => setOfertaCobre(Number(e.target.value))}
@@ -619,9 +619,9 @@ export const VistaJugador: React.FC<Props> = ({
               />
 
               <div className="flex justify-between text-[11px] text-[#9aa1ae] font-mono">
-                <span>Más barato (-80%)</span>
-                <span>Base</span>
-                <span>Más caro (+80%)</span>
+                <span>0% (Gratis)</span>
+                <span>100% (Base)</span>
+                <span>200% (Doble)</span>
               </div>
 
               {/* Input numérico directo por si quieren ajustar en Piezas de Oro exactas */}
