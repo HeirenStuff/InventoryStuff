@@ -98,10 +98,20 @@ export const inventoryApi = {
   },
 
   eliminarItemCatalogo: async (id: string) => {
+    // 1. Eliminar referencias en solicitudes pendientes
+    await supabase.from('solicitudes_tienda').delete().eq('item_id', id);
+    // 2. Eliminar referencias de las mochilas de los jugadores
+    await supabase.from('inventarios').delete().eq('item_id', id);
+    // 3. Eliminar de la mesa común
     await supabase.from('mesa_comun').delete().eq('item_id', id);
+    // 4. Eliminar de las tiendas
     await supabase.from('tienda_items').delete().eq('item_id', id);
+    // 5. Finalmente eliminar del catálogo global
     const { error } = await supabase.from('catalogo_items').delete().eq('id', id);
-    if (error) throw error;
+    if (error) {
+      console.error('Error al eliminar ítem:', error);
+      throw error;
+    }
   },
 
   // Añadir dentro de export const inventoryApi = { ... }
