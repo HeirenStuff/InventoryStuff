@@ -295,27 +295,29 @@
 }
 
 /* ============================================================
-   ESTADO EQUIPADO (Más grande, aura dorada y botón sólido)
+   ESTADO EQUIPADO (Destacado y botón "Equipado" en oro sólido)
    ============================================================ */
+
+/* Solo la tarjeta: crece sutilmente y tiene halo dorado perimetral */
 .rpg-card.ring-1 {
   transform: scale(1.03) !important;
-  filter: saturate(1.5) brightness(1.15) !important;
+  filter: saturate(1.4) brightness(1.1) !important;
   opacity: 1 !important;
   border-color: var(--accent-gold) !important;
-  box-shadow: 0 0 16px rgba(209, 177, 129, 0.45), 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 0 16px rgba(209, 177, 129, 0.45) !important;
   z-index: 5;
 }
 
-/* Botón inferior dorado sólido con letras negras nítidas */
-.rpg-card.ring-1 button[class*="bg-[var(--accent-gold)]"],
-.rpg-card.ring-1 button:first-of-type {
+/* ÚNICAMENTE el botón inferior donde dice la palabra "Equipado" */
+.rpg-card.ring-1 > div:last-child button:first-child {
   background-color: var(--accent-gold) !important;
   color: #111111 !important;
   font-weight: 800 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  letter-spacing: 0.05em;
+  border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Badge EQ superior */
+/* El badge 'EQ' superior */
 .rpg-card.ring-1 span[class*="bg-[var(--accent-gold)]"] {
   background-color: var(--accent-gold) !important;
   color: #111111 !important;
