@@ -292,6 +292,7 @@
   box-shadow: 0 0 20px var(--t-color-1) !important;
   opacity: 1 !important;
   transform: translateY(-2px);
+  z-index: 25 !important;
 }
 
 /* ============================================================
@@ -305,8 +306,8 @@
   opacity: 1 !important;
   border-color: var(--accent-gold) !important;
   box-shadow: 0 0 16px rgba(209, 177, 129, 0.45) !important;
-  z-index: 5;
-}
+  position: relative !important;
+  z-index: 20 !important;}
 
 /* ÚNICAMENTE el botón inferior donde dice la palabra "Equipado" */
 .rpg-card.ring-1 > div:last-child button:first-child {
@@ -349,6 +350,7 @@
 .slot-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  padding: 6px 4px !important;
   gap: 8px !important;
   width: 100% !important;
 }
