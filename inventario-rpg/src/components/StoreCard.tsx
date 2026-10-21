@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Tienda, TiendaItem } from '../types';
 import { ItemIcon, formatearPrecio, inventoryApi } from '../services/inventoryApi';
+import { getItemTypeClass } from '../../utils/itemTheme';
 import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight, Edit2, Check, X } from 'lucide-react';
 
 interface Props {
@@ -14,12 +15,10 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState(tienda.nombre);
 
-  // Multiplicador real de la base de datos. Si no existe o es <= 0, por defecto es 1.0 (precio base)
   const multReal = typeof tienda.multiplicador_precio === 'number' && tienda.multiplicador_precio > 0 
     ? tienda.multiplicador_precio 
     : 1.0;
 
-  // Porcentaje mostrado: 1.0 -> 0% | 0.5 -> -50% | 1.2 -> 20%
   const [porcentajeInput, setPorcentajeInput] = useState<number>(Math.round((multReal - 1) * 100));
 
   useEffect(() => {
@@ -71,7 +70,6 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
   };
 
   const handleGuardarPorcentaje = async (pct: number) => {
-    // 0% -> 1.0 | -50% -> 0.5 | +20% -> 1.20
     const nuevoMult = Math.max(0.05, Number((1 + pct / 100).toFixed(2)));
     await inventoryApi.actualizarMultiplicadorTienda(tienda.id, nuevoMult);
     onActualizar();
@@ -84,15 +82,20 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
       onDragOver={(e) => { e.preventDefault(); setIsHovered(true); }}
       onDragLeave={() => setIsHovered(false)}
       onDrop={handleDropEnTienda}
-      className={`border ${
+      className={`border rounded-sm transition-all duration-200 ${
         isHovered
-          ? 'border-[#9bb6cc] bg-[#14181f]'
-          : 'bg-[#101218] border-[#2c303a]'
+          ? 'border-[var(--accent-gold)] bg-[var(--panel)] shadow-[0_0_15px_rgba(209,177,129,0.2)]'
+          : 'bg-[var(--panel)] border-[var(--border-color)]'
       }`}
     >
-      <div className="p-3 flex justify-between items-center gap-2 border-b border-[#2c303a] bg-[#0c0e13]">
+      {/* HEADER DE LA TIENDA */}
+      <div className="p-3 flex justify-between items-center gap-2 border-b border-[var(--border-color)] bg-[var(--panel-dark)]">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className={`p-2 border shrink-0 ${tienda.abierta ? 'bg-[#1a2a22] border-[#3d6a56] text-[#7dba9a]' : 'bg-[#161920] border-[#2c303a] text-[#6d7380]'}`}>
+          <div className={`p-2 border shrink-0 rounded-xs ${
+            tienda.abierta 
+              ? 'bg-[#1e2419] border-[#5d733c] text-[#a4c66f]' 
+              : 'bg-[var(--panel)] border-[var(--border-color)] text-[var(--text-muted)]'
+          }`}>
             <Store className="w-4 h-4" />
           </div>
 
@@ -112,7 +115,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
               <button 
                 type="button" 
                 onClick={handleGuardarNombre} 
-                className="btn-success p-1 min-h-8 min-w-8 flex items-center justify-center"
+                className="btn-primary p-1 min-h-8 min-w-8 flex items-center justify-center"
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
@@ -131,21 +134,21 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
               className="text-left flex-1 min-w-0 cursor-pointer"
               aria-expanded={expandido}
             >
-              <h3 className="font-semibold text-sm text-[#eceef2] truncate">
+              <h3 className="font-semibold text-sm text-[var(--text-main)] truncate tracking-wide">
                 {tienda.nombre}
-                <span className="text-xs font-mono text-[#9aa1ae] font-normal ml-1.5">({items.length})</span>
+                <span className="text-xs font-mono text-[var(--accent-gold-dim)] font-normal ml-1.5">({items.length})</span>
               </h3>
-              <p className="text-xs text-[#9aa1ae]">
+              <p className="text-xs text-[var(--text-muted)]">
                 {isHovered ? 'Suelta para añadir stock' : tienda.abierta ? 'Abierta para el grupo' : 'Oculta'}
               </p>
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {/* CONTROL DE AJUSTE % */}
           <div 
-            className="flex items-center bg-[#07080b] border border-[#2c303a] px-1.5 py-0.5 text-xs" 
+            className="flex items-center bg-[var(--bg-stone)] border border-[var(--border-color)] px-1.5 py-0.5 text-xs rounded-xs" 
             title="Ajuste de precio: 0% es precio base, -50% es mitad de precio, 20% es recargo"
           >
             <input
@@ -162,10 +165,10 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                 }
               }}
               className={`w-11 bg-transparent text-right font-mono font-bold outline-none ${
-                porcentajeInput < 0 ? 'text-[#7dba9a]' : porcentajeInput > 0 ? 'text-[#d98989]' : 'text-[#d4b978]'
+                porcentajeInput < 0 ? 'text-[#8ea35b]' : porcentajeInput > 0 ? 'text-[#c25953]' : 'text-[var(--accent-gold)]'
               }`}
             />
-            <span className="text-[11px] text-[#9aa1ae] font-mono ml-0.5">%</span>
+            <span className="text-[11px] text-[var(--text-muted)] font-mono ml-0.5">%</span>
           </div>
 
           {!editando && (
@@ -173,7 +176,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
               <button
                 type="button"
                 onClick={() => setEditando(true)}
-                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]"
+                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
                 title="Editar nombre"
               >
                 <Edit2 className="w-3.5 h-3.5" />
@@ -182,7 +185,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
               <button
                 type="button"
                 onClick={handleEliminarTienda}
-                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]"
+                className="min-h-8 min-w-8 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[#c25953] transition-colors"
                 title="Eliminar tienda"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -193,7 +196,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
           <button
             type="button"
             onClick={() => { inventoryApi.toggleTiendaAbierta(tienda.id, tienda.abierta).then(onActualizar); }}
-            className={tienda.abierta ? 'btn-danger py-1 px-2 text-xs' : 'btn-success py-1 px-2 text-xs'}
+            className={tienda.abierta ? 'btn-danger py-1 px-2.5 text-xs' : 'btn-primary py-1 px-2.5 text-xs'}
           >
             {tienda.abierta ? 'Cerrar' : 'Abrir'}
           </button>
@@ -201,17 +204,18 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
           <button 
             type="button" 
             onClick={() => setExpandido(!expandido)} 
-            className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#eceef2]"
+            className="min-h-8 min-w-8 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)]"
           >
             {expandido ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
+      {/* LISTADO DE ITEMS CON FORMATO GRIMORIO */}
       {expandido && (
-        <div className="p-2 space-y-1">
+        <div className="p-2 space-y-1.5">
           {items.length === 0 ? (
-            <p className="text-center py-6 text-sm text-[#9aa1ae] border border-dashed border-[#2c303a]">
+            <p className="text-center py-6 text-sm text-[var(--text-muted)] border border-dashed border-[var(--border-color)]">
               Sin productos. Arrastra ítems del catálogo.
             </p>
           ) : (
@@ -221,15 +225,24 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
               const precioCalculado = Math.round(precioBase * multReal);
 
               return (
-                <div key={tItem.id} className={`flex items-center justify-between gap-2 p-2 border text-sm ${agotado ? 'opacity-50 border-[#2c303a] bg-[#0c0e13]' : 'border-[#2c303a] bg-[#0c0e13]'}`}>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <ItemIcon name={tItem.item.icono} className="w-5 h-5 text-[#c5d4e4] shrink-0" />
+                <div 
+                  key={tItem.id} 
+                  className={`rpg-card ${getItemTypeClass(tItem.item)} flex items-center justify-between gap-2 p-2 text-sm ${
+                    agotado ? 'opacity-40 grayscale-[0.5]' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="p-1.5 rounded-xs bg-[var(--panel-dark)] border border-[var(--border-color)] shrink-0">
+                      <ItemIcon name={tItem.item.icono} className="w-4 h-4 text-[var(--accent-gold)]" />
+                    </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-[#eceef2] truncate">{tItem.item.nombre}</p>
-                      <p className="text-xs text-[#d4b978] font-mono">
+                      <p className="font-semibold text-[var(--text-main)] truncate leading-tight">
+                        {tItem.item.nombre}
+                      </p>
+                      <p className="text-xs text-[var(--accent-gold)] font-mono flex items-center gap-1 mt-0.5">
                         {formatearPrecio(precioCalculado)}
                         {porcentajeInput !== 0 && (
-                          <span className={`text-[10px] ml-1.5 font-bold ${porcentajeInput < 0 ? 'text-[#7dba9a]' : 'text-[#d98989]'}`}>
+                          <span className={`text-[10px] font-bold ${porcentajeInput < 0 ? 'text-[#8ea35b]' : 'text-[#c25953]'}`}>
                             ({porcentajeInput > 0 ? `+${porcentajeInput}` : porcentajeInput}%)
                           </span>
                         )}
@@ -237,26 +250,46 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Control de Stock */}
                     {tItem.stock !== null ? (
-                      <div className="flex items-center border border-[#2c303a] text-xs font-mono">
-                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, -1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]">
-                          <Minus className="w-3.5 h-3.5" />
+                      <div className="flex items-center bg-[var(--panel-dark)] border border-[var(--border-color)] text-xs font-mono rounded-xs">
+                        <button 
+                          type="button" 
+                          onClick={() => inventoryApi.modificarStockTienda(tItem.id, -1, tItem.stock).then(onActualizar)} 
+                          className="min-h-7 min-w-7 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[#c25953] transition-colors cursor-pointer"
+                        >
+                          <Minus className="w-3 h-3" />
                         </button>
-                        <span className="font-bold w-6 text-center">{tItem.stock}</span>
-                        <button type="button" onClick={() => inventoryApi.modificarStockTienda(tItem.id, 1, tItem.stock).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#7dba9a]">
-                          <Plus className="w-3.5 h-3.5" />
+                        <span className="font-bold w-6 text-center text-[var(--text-main)]">{tItem.stock}</span>
+                        <button 
+                          type="button" 
+                          onClick={() => inventoryApi.modificarStockTienda(tItem.id, 1, tItem.stock).then(onActualizar)} 
+                          className="min-h-7 min-w-7 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[#8ea35b] transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" />
                         </button>
                       </div>
                     ) : (
-                      <span className="text-xs text-[#9aa1ae] font-mono px-2">∞</span>
+                      <span className="text-xs text-[var(--accent-gold-dim)] font-mono px-2">∞</span>
                     )}
 
-                    <button type="button" onClick={() => handleMandarAMesa(tItem)} title="Tirar 1 a la mesa" className="min-h-8 min-w-8 inline-flex items-center justify-center border border-[#2c303a] text-[#c5d4e4] hover:bg-[#161920]">
-                      <ArrowUpRight className="w-4 h-4" />
+                    <button 
+                      type="button" 
+                      onClick={() => handleMandarAMesa(tItem)} 
+                      title="Tirar 1 a la mesa" 
+                      className="min-h-7 min-w-7 inline-flex items-center justify-center border border-[var(--border-color)] bg-[var(--panel-dark)] text-[var(--text-main)] hover:border-[var(--accent-gold)] hover:text-[var(--accent-gold)] transition-colors rounded-xs cursor-pointer"
+                    >
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
-                    <button type="button" onClick={() => inventoryApi.eliminarDeTienda(tItem.id).then(onActualizar)} className="min-h-8 min-w-8 inline-flex items-center justify-center text-[#9aa1ae] hover:text-[#d98989]">
-                      <Trash2 className="w-4 h-4" />
+                    
+                    <button 
+                      type="button" 
+                      onClick={() => inventoryApi.eliminarDeTienda(tItem.id).then(onActualizar)} 
+                      className="min-h-7 min-w-7 inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[#c25953] transition-colors cursor-pointer"
+                      title="Quitar de tienda"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
