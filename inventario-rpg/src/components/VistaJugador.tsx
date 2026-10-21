@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { Personaje, ItemInventario, ItemMesaComun, Tienda, TiendaItem, SolicitudTienda } from '../types';
+import type { Personaje, ItemInventario, ItemMesaComun, Tienda, SolicitudTienda } from '../types';
 import { 
   inventoryApi, cobreAMonedas, formatearPrecio, ItemIcon 
 } from '../services/inventoryApi';
