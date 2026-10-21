@@ -277,6 +277,28 @@
   opacity: 0.85;
 }
 
+
+/* Cosa que hace que las tarjetas tengan color bien?*/
+.rpg-card > div,
+.rpg-card > button,
+.rpg-card .p-2 {
+  background-color: transparent !important;
+}
+
+/* Solo los badges y botones mantienen un contraste legible */
+.rpg-card span.font-mono,
+.rpg-card .rpg-badge {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+}
+
+.rpg-card button:last-child {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+.rpg-card button:last-child:hover {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
 /* ============================================================
    FORZAR 3 COLUMNAS EN INVENTARIO (SLOT GRID)
    ============================================================ */
