@@ -13,15 +13,6 @@
   --text-main: #e0d8c3;
   --text-muted: #9c9483;
 
-  /* --- COLORES POR TIPO DE OBJETO (D&D) --- */
-  --type-weapon: #c25953;    /* Rojo herrería */
-  --type-armor: #738ba8;     /* Acero / Azul grisáceo */
-  --type-potion: #c44f77;    /* Magenta alquimia */
-  --type-scroll: #8ea35b;    /* Verde papiro / Mágico */
-  --type-ring: #dfa84a;      /* Oro / Joyería / Amuletos */
-  --type-wondrous: #9b6bc4;  /* Púrpura arcano (Varitas / Reliquias) */
-  --type-misc: #828078;      /* Gris piedra / Equipamiento común */
-
   /* --- MONEDAS D&D --- */
   --coin-cp: #b87333; /* Cobre */
   --coin-sp: #b5c2c7; /* Plata */
@@ -165,37 +156,6 @@
   border-color: var(--accent-gold);
 }
 
-/* ============================================================
-   TARJETAS DE OBJETOS Y RANGOS POR COLOR
-   ============================================================ */
-
-.rpg-card {
-  --type-color: var(--border-color);
-  position: relative;
-  background: linear-gradient(135deg, rgba(37, 37, 32, 0.95), rgba(20, 20, 16, 0.98));
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--type-color);
-  padding: 10px 12px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.rpg-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  border-color: var(--accent-gold-dim);
-  border-left-color: var(--type-color);
-}
-
-/* Clases por tipo de ítem para asignar en el HTML/React */
-.item-weapon   { --type-color: var(--type-weapon); }
-.item-armor    { --type-color: var(--type-armor); }
-.item-potion   { --type-color: var(--type-potion); }
-.item-scroll   { --type-color: var(--type-scroll); }
-.item-ring     { --type-color: var(--type-ring); }
-.item-wondrous { --type-color: var(--type-wondrous); }
-.item-misc     { --type-color: var(--type-misc); }
-
 /* Badges de atributos y peso */
 .rpg-badge {
   font-size: 0.7rem;
@@ -224,3 +184,94 @@
 .coin-chip.ep { border-bottom: 2px solid var(--coin-ep); color: var(--coin-ep); }
 .coin-chip.gp { border-bottom: 2px solid var(--coin-gp); color: var(--coin-gp); }
 .coin-chip.pp { border-bottom: 2px solid var(--coin-pp); color: var(--coin-pp); }
+
+/* ============================================================
+   PALETAS DE COLOR POR TIPO DE OBJETO (Estilo Track-Cards)
+   ============================================================ */
+.item-weapon   { --t-color-1: #8a2323; --t-color-2: #4a1010; } /* Forja / Carmesí */
+.item-armor    { --t-color-1: #2c4a6f; --t-color-2: #162438; } /* Acero / Azul */
+.item-potion   { --t-color-1: #8f235b; --t-color-2: #4d0e30; } /* Magenta / Alquimia */
+.item-scroll   { --t-color-1: #3f6834; --t-color-2: #1e3617; } /* Verde papiro / Tomo */
+.item-ring     { --t-color-1: #9c6c18; --t-color-2: #523707; } /* Oro / Joyería */
+.item-wondrous { --t-color-1: #6a2c91; --t-color-2: #341249; } /* Arcano / Varitas */
+.item-misc     { --t-color-1: #3d3d33; --t-color-2: #21211b; } /* Piedra / Neutro */
+
+/* ============================================================
+   TARJETAS COMPLETAS CON COLOR Y TEXTURA
+   ============================================================ */
+.rpg-card {
+  --t-color-1: #3d3d33;
+  --t-color-2: #21211b;
+
+  position: relative;
+  border-radius: 4px;
+  border: 1.5px solid var(--t-color-1) !important;
+  background: linear-gradient(rgba(10, 10, 8, 0.75), rgba(10, 10, 8, 0.75)),
+              linear-gradient(135deg, var(--t-color-1), var(--t-color-2)) !important;
+  filter: saturate(1.1) brightness(0.95);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+/* Textura hexagonal de fondo de tu otra app */
+.rpg-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23ffffff' fill-opacity='0.12' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hover: saturación y brillo de color */
+.rpg-card:hover {
+  filter: saturate(1.4) brightness(1.1);
+  border-color: #fff !important;
+  box-shadow: 0 0 12px var(--t-color-1);
+}
+
+/* Halo dorado si está equipado */
+.rpg-card.ring-1 {
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 14px rgba(209, 177, 129, 0.45) !important;
+}
+
+/* ============================================================
+   FILTROS POR ENCIMA: SECRETO Y BAÚL
+   ============================================================ */
+
+/* SECRETO: Filtro morado etéreo desaturado y borde punteado */
+.rpg-card[class*="bg-[#18131d]"],
+.rpg-card:has([title="Secreto"]),
+.rpg-card:has(.lucide-eye-off) {
+  filter: saturate(0.55) brightness(0.7) hue-rotate(260deg) !important;
+  border-style: dashed !important;
+  border-color: #9b6bc4 !important;
+}
+
+/* BAÚL: Filtro frío de almacenamiento */
+.rpg-card[class*="bg-[#14181f]"],
+.rpg-card:has([title="Mover a la mochila"]),
+.rpg-card:has(.lucide-package) {
+  filter: saturate(0.45) brightness(0.65) !important;
+  opacity: 0.85;
+}
+
+/* ============================================================
+   FORZAR 3 COLUMNAS EN INVENTARIO (SLOT GRID)
+   ============================================================ */
+.slot-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+/* En teléfonos chicos baja a 2 columnas */
+@media (max-width: 480px) {
+  .slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+}
