@@ -36,3 +36,10 @@ export const getItemTypeClass = (itemOrType?: any): string => {
   // 9. EQUIPO GENERAL / POR DEFECTO
   return 'item-equipo';
 };
+
+export const formatearPeso = (libras: number | string): string => {
+  const lb = Number(libras) || 0;
+  const kg = lb * 0.453592; // Conversión real estándar
+  // Si da 0 o es muy chico pero existe, que muestre 0.1 al menos
+  return kg > 0 && kg < 0.1 ? '0.1 kg' : `${kg.toFixed(1)} kg`;
+};

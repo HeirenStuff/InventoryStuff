@@ -3,7 +3,7 @@ import type { Personaje, ItemInventario, ItemMesaComun, Tienda, SolicitudTienda 
 import { 
   inventoryApi, cobreAMonedas, formatearPrecio, ItemIcon 
 } from '../services/inventoryApi';
-import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta la ruta a tu utils/itemTheme
+import { getItemTypeClass, formatearPeso } from '../../utils/itemTheme'; // Ajusta la ruta a tu utils/itemTheme
 import { ItemTile } from './ItemTile';
 import { MesaComun } from './MesaComun';
 import { 
@@ -210,7 +210,7 @@ export const VistaJugador: React.FC<Props> = ({
               <Dumbbell className="w-3.5 h-3.5 text-[var(--accent-gold-dim)]" />
               <span>FUE {personaje.fuerza}</span>
               <span className={sobrecargado ? 'text-[#c25953] font-bold' : 'text-[var(--accent-gold)]'}>
-                {pesoActual.toFixed(1)} / {pesoMaximo} lbs
+                {formatearPeso(pesoActual)} / {formatearPeso(pesoMaximo)}
               </span>
               {sobrecargado && (
                 <span className="flex items-center gap-1 text-[#c25953] font-bold">

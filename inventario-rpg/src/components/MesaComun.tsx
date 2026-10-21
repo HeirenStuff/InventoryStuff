@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { ItemMesaComun, Personaje } from '../types';
 import { ItemIcon, cobreAMonedas } from '../services/inventoryApi';
-import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta los '../' según tu estructura de carpetas
+import { getItemTypeClass, formatearPeso } from '../../utils/itemTheme';
 import { Coins, ArrowDownToLine, Users, Sliders, Trash2 } from 'lucide-react';
 
 interface Props {
@@ -186,7 +186,9 @@ export const MesaComun: React.FC<Props> = ({
                         <ItemIcon name={m.item?.icono || 'package'} className="w-6 h-6" />
                       </div>
                       <p className="text-xs font-semibold text-[var(--text-main)] line-clamp-2 leading-tight">{m.item?.nombre}</p>
-                      <p className="text-[11px] font-mono text-[var(--text-muted)] mt-1">{m.item?.peso} lbs</p>
+                      <p className="text-[11px] font-mono text-[var(--text-muted)] mt-1">
+                        {formatearPeso(m.item?.peso || 0)}
+                      </p>
                     </div>
 
                     {!esDM ? (

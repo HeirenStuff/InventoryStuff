@@ -1,10 +1,11 @@
 //Importantes
-- Que funcione el tema de los colores
 - No funciona cuando elimino un objeto desde la app
 - Que cada jugador pueda hacer notas a un objeto (notas en objeto ya esta creado)
 - Apartado de "Notas" donde poder modificar y dejar anotaciones personales de jugador
 - Servicios como tal, no items, tipo peajes (esto tiene que ser del lado del jugador supongo? y otro del lado del dm que pueda pedir la cantidad que solicite yo)
 - Una conversion de libras a kilos
+- Filtros de precios o de peso
+- Tags a los items, fuera de la categoria
 
 //Secundarios
 - que cuando estas un segundo con el mouse quieto encima del objeto te pase a la descripcion
@@ -19,4 +20,6 @@ Hechos
 - Separar bases de datos para distintas campañas
 - Poder crear los jugadores fuera de la base de datos
 - Hacer subdominio unico para jugadores
+- Que funcione el tema de los colores
+
 

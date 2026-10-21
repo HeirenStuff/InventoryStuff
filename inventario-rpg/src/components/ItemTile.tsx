@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ItemInventario } from '../types';
 import { ItemIcon, formatearPrecio } from '../services/inventoryApi';
-import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta los '../' según tu estructura
+import { getItemTypeClass, formatearPeso } from '../../utils/itemTheme';
 import { Eye, EyeOff, Archive, Package } from 'lucide-react';
 
 interface Props {
@@ -98,8 +98,10 @@ export const ItemTile: React.FC<Props> = ({
         <p className="text-sm font-semibold text-[var(--text-main)] leading-tight line-clamp-2 w-full">
           {item.nombre}
         </p>
-        <p className="text-xs font-mono text-[var(--text-muted)] mt-1">{pesoTotal} lbs</p>
-      </button>
+          <p className="text-xs font-mono text-[var(--text-muted)] mt-1">
+            {formatearPeso(item.peso * cantidad)}
+          </p>      
+        </button>
 
       {/* DETALLES DESPLEGABLES */}
       {detalle && (
