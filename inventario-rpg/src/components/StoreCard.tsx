@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Tienda, TiendaItem } from '../types';
 import { ItemIcon, formatearPrecio, inventoryApi } from '../services/inventoryApi';
 import { Store, ChevronDown, ChevronUp, Trash2, Plus, Minus, ArrowUpRight, Edit2, Check, X, Percent } from 'lucide-react';
@@ -13,9 +13,19 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState(tienda.nombre);
-  const [multInput, setMultInput] = useState<number>(tienda.multiplicador_precio ?? 1.0);
 
-  const multTienda = tienda.multiplicador_precio ?? 1.0;
+  // El multiplicador de la BD (ej: 1.0, 0.5, 1.2). Si viene null o 0, el default es 1.0
+  const multReal = typeof tienda.multiplicador_precio === 'number' && tienda.multiplicador_precio > 0 
+    ? tienda.multiplicador_precio 
+    : 1.0;
+
+  // Convertimos el multiplicador real a porcentaje relativo (+0%, -50%, +20%)
+  // Ej: 1.0 -> 0% | 0.5 -> -50% | 1.2 -> +20%
+  const [porcentajeInput, setPorcentajeInput] = useState<number>(Math.round((multReal - 1) * 100));
+
+  useEffect(() => {
+    setPorcentajeInput(Math.round((multReal - 1) * 100));
+  }, [multReal]);
 
   const handleDropEnTienda = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -61,8 +71,9 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
     }
   };
 
-  const handleCambiarMultiplicador = async (nuevoMult: number) => {
-    setMultInput(nuevoMult);
+  const handleGuardarPorcentaje = async (pct: number) => {
+    // Calculamos el multiplicador: 0% -> 1.0 | -50% -> 0.5 | +20% -> 1.2
+    const nuevoMult = Math.max(0.05, Number((1 + (pct / 100)).toFixed(2)));
     await inventoryApi.actualizarMultiplicadorTienda(tienda.id, nuevoMult);
     onActualizar();
   };
@@ -133,19 +144,27 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* CONTROL MULTIPLICADOR */}
-          <div className="flex items-center gap-1 bg-[#07080b] border border-[#2c303a] px-1.5 py-0.5 rounded text-xs" title="Modificador de precio (Ej: 0.5 = Mitad de precio)">
-            <Percent className="w-3 h-3 text-[#d4b978]" />
+          {/* CONTROL DE AJUSTE DE PRECIO EN % */}
+          <div 
+            className="flex items-center gap-0.5 bg-[#07080b] border border-[#2c303a] px-1.5 py-0.5 text-xs" 
+            title="Ajuste de precio: 0% es normal, -50% es mitad de precio, +20% es recargo"
+          >
             <input
               type="number"
-              step="0.1"
-              min="0"
-              max="10"
-              value={multInput}
-              onChange={(e) => setMultInput(parseFloat(e.target.value) || 0)}
-              onBlur={(e) => handleCambiarMultiplicador(parseFloat(e.target.value) || 1.0)}
-              className="w-11 bg-transparent text-center font-mono font-bold text-[#d4b978] outline-none"
+              step="5"
+              min="-95"
+              max="500"
+              value={porcentajeInput}
+              onChange={(e) => setPorcentajeInput(parseInt(e.target.value) || 0)}
+              onBlur={(e) => handleGuardarPorcentaje(parseInt(e.target.value) || 0)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleGuardarPorcentaje(porcentajeInput);
+              }}
+              className={`w-12 bg-transparent text-right font-mono font-bold outline-none ${
+                porcentajeInput < 0 ? 'text-[#7dba9a]' : porcentajeInput > 0 ? 'text-[#d98989]' : 'text-[#d4b978]'
+              }`}
             />
+            <span className="text-[11px] text-[#9aa1ae] font-mono">%</span>
           </div>
 
           {!editando && (
@@ -198,7 +217,7 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
             items.map((tItem) => {
               const agotado = tItem.stock !== null && tItem.stock <= 0;
               const precioBase = tItem.precio_cobre_override ?? tItem.item.precio_cobre;
-              const precioCalculado = Math.round(precioBase * multTienda);
+              const precioCalculado = Math.round(precioBase * multReal);
 
               return (
                 <div key={tItem.id} className={`flex items-center justify-between gap-2 p-2 border text-sm ${agotado ? 'opacity-50 border-[#2c303a] bg-[#0c0e13]' : 'border-[#2c303a] bg-[#0c0e13]'}`}>
@@ -208,8 +227,10 @@ export const StoreCard: React.FC<Props> = ({ tienda, onActualizar }) => {
                       <p className="font-semibold text-[#eceef2] truncate">{tItem.item.nombre}</p>
                       <p className="text-xs text-[#d4b978] font-mono">
                         {formatearPrecio(precioCalculado)}
-                        {multTienda !== 1.0 && (
-                          <span className="text-[10px] text-[#9aa1ae] ml-1">({multTienda}x)</span>
+                        {porcentajeInput !== 0 && (
+                          <span className={`text-[10px] ml-1.5 font-bold ${porcentajeInput < 0 ? 'text-[#7dba9a]' : 'text-[#d98989]'}`}>
+                            ({porcentajeInput > 0 ? `+${porcentajeInput}` : porcentajeInput}%)
+                          </span>
                         )}
                       </p>
                     </div>
