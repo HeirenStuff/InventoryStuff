@@ -87,7 +87,9 @@ export const VistaJugador: React.FC<Props> = ({
           }];
         });
 
-        await inventoryApi.soltarEnMesa(personaje.nombre, inv, 1);
+        // 👉 AQUÍ: enviamos la campaña del personaje
+        const campanaPj = (personaje as any).campana_id || '01';
+        await inventoryApi.soltarEnMesa(personaje.nombre, inv, 1, campanaPj);
         onRecargar();
       }
     } catch (err) { console.error(err); }

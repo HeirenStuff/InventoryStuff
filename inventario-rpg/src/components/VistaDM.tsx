@@ -366,7 +366,7 @@ export const VistaDM: React.FC<Props> = ({
                       </button>
                     </div>
                     <button
-                      onClick={() => inventoryApi.soltarEnMesa('DM', { id: '', personaje_id: '', item_id: item.id, cantidad: 1, equipado: false, es_secreto: false, item }, 1).then(onRecargar)}
+                      onClick={() => inventoryApi.soltarEnMesa('DM', { id: '', personaje_id: '', item_id: item.id, cantidad: 1, equipado: false, es_secreto: false, item }, 1, campanaActivaId).then(onRecargar)}
                       className="w-full btn-secondary min-h-9 text-xs border-0 border-t border-[#2c303a]"
                     >
                       Soltar en mesa <ArrowRight className="w-3.5 h-3.5" />
@@ -388,7 +388,7 @@ export const VistaDM: React.FC<Props> = ({
                 <button
                   onClick={() => {
                     const total = monedasACobre(dmOro, dmPlata, dmCobre);
-                    inventoryApi.soltarBolsaMonedas(total).then(onRecargar);
+                    inventoryApi.soltarBolsaMonedas(total, campanaActivaId).then(onRecargar); 
                     setDmOro(0); setDmPlata(0); setDmCobre(0);
                   }}
                   className="btn-primary"
@@ -408,7 +408,7 @@ export const VistaDM: React.FC<Props> = ({
                 if (data.tipo === 'catalogo') {
                   const it = catalogo.find(i => i.id === data.itemId);
                   if (it) {
-                    await inventoryApi.soltarEnMesa('DM', { id: '', personaje_id: '', item_id: it.id, cantidad: 1, equipado: false, es_secreto: false, item: it }, 1);
+                    await inventoryApi.soltarEnMesa('DM', { id: '', personaje_id: '', item_id: it.id, cantidad: 1, equipado: false, es_secreto: false, item: it }, 1, campanaActivaId);
                     onRecargar();
                   }
                 }

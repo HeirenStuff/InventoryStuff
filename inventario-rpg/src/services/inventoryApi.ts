@@ -188,11 +188,18 @@ export const inventoryApi = {
     await inventoryApi.agregarAInventario(personajeId, itemId, cantidad);
   },
 
-  soltarEnMesa: async (personajeNombre: string, inv: ItemInventario, cantidadASoltar = 1) => {
+  soltarEnMesa: async (
+    personajeNombre: string, 
+    inv: ItemInventario, 
+    cantidadASoltar = 1, 
+    campanaId = '01'
+  ) => {
+    // 1. Buscar si ya existe el ítem PERO en ESTA misma campaña
     const { data: itemExistente } = await supabase
       .from('mesa_comun')
       .select('id, cantidad')
       .eq('item_id', inv.item.id)
+      .eq('campana_id', campanaId)
       .eq('es_bolsa_monedas', false)
       .maybeSingle();
 
@@ -212,6 +219,7 @@ export const inventoryApi = {
           cantidad: cantidadASoltar,
           creado_por: personajeNombre,
           es_bolsa_monedas: false,
+          campana_id: campanaId, // 👈 Se guarda en la campaña correcta
         }])
       );
     }
@@ -230,6 +238,7 @@ export const inventoryApi = {
 
     await Promise.all(promesas);
   },
+
 
   tomarDeMesa: async (personajeId: string, mesaItem: ItemMesaComun) => {
     if (!mesaItem.item_id) return;
@@ -274,7 +283,7 @@ export const inventoryApi = {
     await Promise.all(promesas);
   },
 
-  soltarBolsaMonedas: async (cobreTotal: number) => {
+  soltarBolsaMonedas: async (cobreTotal: number, campanaId = '01') => {
     if (cobreTotal <= 0) return;
     await supabase.from('mesa_comun').insert([{
       item_id: null,
@@ -282,8 +291,10 @@ export const inventoryApi = {
       creado_por: 'DM',
       es_bolsa_monedas: true,
       monedas_cobre_contenido: cobreTotal,
+      campana_id: campanaId, // 👈 Se guarda en la campaña correcta
     }]);
   },
+
 
   tomarBolsaMonedas: async (personaje: Personaje, bolsa: ItemMesaComun, cantidadCobre?: number) => {
     const disponible = bolsa.monedas_cobre_contenido || 0;
