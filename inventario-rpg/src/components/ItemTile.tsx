@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ItemInventario } from '../types';
 import { ItemIcon, formatearPrecio } from '../services/inventoryApi';
+import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta los '../' según tu estructura
 import { Eye, EyeOff, Archive, Package } from 'lucide-react';
 
 interface Props {
@@ -32,88 +33,95 @@ export const ItemTile: React.FC<Props> = ({
   };
 
   const precioTxt = formatearPrecio(item.precio_cobre);
+  const tipoClase = getItemTypeClass(item);
 
   return (
     <article
       draggable
       onDragStart={handleDragStart}
-      className={`flex flex-col border cursor-grab active:cursor-grabbing select-none min-h-[168px] ${
-        es_secreto
-          ? 'bg-[#14101a] border-[#4a3d5c]'
+      className={`rpg-card ${tipoClase} flex flex-col cursor-grab active:cursor-grabbing select-none min-h-[175px] !p-0 overflow-hidden transition-all duration-200 ${
+        equipado
+          ? 'ring-1 ring-[var(--accent-gold)] shadow-[0_0_12px_rgba(209,177,129,0.25)]'
+          : es_secreto
+          ? 'bg-[#18131d]'
           : en_baul
-          ? 'bg-[#10141a] border-[#3a4a5c]'
-          : 'bg-[#0c0e13] border-[#2c303a] hover:border-[#4a5160]'
-      } ${equipado ? 'border-[#9bb6cc] bg-[#12161c]' : ''}`}
+          ? 'bg-[#14181f]'
+          : ''
+      }`}
     >
-      <div className="flex justify-between items-center px-2 pt-2">
+      {/* BARRA SUPERIOR (Visibilidad, badges y cantidad) */}
+      <div className="flex justify-between items-center px-2 pt-2 z-10">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onToggleSecreto(inv.id); }}
-          className={`min-h-8 min-w-8 inline-flex items-center justify-center ${
-            es_secreto ? 'text-[#c4b4e0]' : 'text-[#5c6370] hover:text-[#eceef2]'
+          className={`min-h-7 min-w-7 inline-flex items-center justify-center transition-colors cursor-pointer ${
+            es_secreto ? 'text-[var(--type-wondrous)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
           }`}
           aria-label={es_secreto ? 'Objeto secreto. Pulsar para hacerlo público' : 'Objeto público. Pulsar para ocultarlo'}
           title={es_secreto ? 'Secreto' : 'Público'}
         >
-          {es_secreto ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {es_secreto ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
         </button>
 
         <div className="flex items-center gap-1">
           {equipado && (
-            <span className="text-[11px] font-bold tracking-wide text-[#0b1016] bg-[#9bb6cc] px-1.5 py-0.5">
+            <span className="text-[10px] font-bold tracking-wider text-[#111] bg-[var(--accent-gold)] px-1.5 py-0.2 rounded-xs shadow-xs">
               EQ
             </span>
           )}
           {en_baul && (
-            <span className="text-[11px] font-bold tracking-wide text-[#c5d4e4] bg-[#243040] px-1.5 py-0.5 border border-[#3a4a5c]">
+            <span className="text-[10px] font-bold tracking-wider text-[var(--text-main)] bg-[#252e3d] px-1.5 py-0.2 border border-[#3b4c66] rounded-xs">
               BAÚL
             </span>
           )}
-          <span className="text-xs font-mono font-bold px-1.5 py-0.5 bg-[#07080b] border border-[#2c303a] text-[#eceef2]">
+          <span className="text-xs font-mono font-bold px-1.5 py-0.5 bg-[var(--panel-dark)] border border-[var(--border-color)] text-[var(--accent-gold)] rounded-xs">
             x{cantidad}
           </span>
         </div>
       </div>
 
+      {/* CUERPO CENTRAL (Icono, Título y Peso) */}
       <button
         type="button"
         onClick={() => setDetalle(v => !v)}
-        className="flex-1 flex flex-col items-center justify-center px-2 py-1 text-center"
+        className="flex-1 flex flex-col items-center justify-center px-2.5 py-1.5 text-center cursor-pointer"
         aria-expanded={detalle}
         aria-label={`${item.nombre}. ${detalle ? 'Ocultar' : 'Ver'} detalles`}
       >
-        <div className={`p-2 mb-1.5 border ${
+        <div className={`p-2 mb-1.5 border rounded-xs transition-colors ${
           equipado
-            ? 'bg-[#161b22] border-[#9bb6cc] text-[#c5d4e4]'
-            : es_secreto
-            ? 'bg-[#1a1622] border-[#4a3d5c] text-[#c4b4e0]'
-            : 'bg-[#07080b] border-[#2c303a] text-[#c5d4e4]'
+            ? 'bg-[var(--panel-dark)] border-[var(--accent-gold)] text-[var(--accent-gold)]'
+            : 'bg-[var(--panel-dark)] border-[var(--border-color)] text-[var(--text-main)]'
         }`}>
           <ItemIcon name={item.icono} className="w-6 h-6" />
         </div>
-        <p className="text-sm font-semibold text-[#eceef2] leading-tight line-clamp-2 w-full">
+        <p className="text-sm font-semibold text-[var(--text-main)] leading-tight line-clamp-2 w-full">
           {item.nombre}
         </p>
-        <p className="text-xs font-mono text-[#9aa1ae] mt-0.5">{pesoTotal} lbs</p>
+        <p className="text-xs font-mono text-[var(--text-muted)] mt-1">{pesoTotal} lbs</p>
       </button>
 
+      {/* DETALLES DESPLEGABLES */}
       {detalle && (
-        <div className="px-2 pb-2 text-left border-t border-[#2c303a] pt-2 mx-0">
-          <p className="text-[11px] uppercase tracking-wider text-[#9aa1ae] mb-1">{item.categoria} · {precioTxt}</p>
-          <p className="text-xs text-[#d5dae3] leading-snug">
+        <div className="px-2.5 pb-2 text-left border-t border-[var(--border-color)] bg-[var(--panel-dark)] pt-2 mx-0">
+          <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--accent-gold-dim)] mb-1">
+            {item.categoria} · {precioTxt}
+          </p>
+          <p className="text-xs text-[var(--text-main)] leading-snug opacity-90">
             {item.descripcion || 'Sin descripción.'}
           </p>
         </div>
       )}
 
-      <div className="flex items-stretch gap-px bg-[#2c303a] mt-auto">
+      {/* BOTONERA INFERIOR */}
+      <div className="flex items-stretch gap-px bg-[var(--border-color)] mt-auto border-t border-[var(--border-color)]">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onToggleEquipar(inv.id); }}
-          className={`flex-1 min-h-10 text-xs font-semibold ${
+          className={`flex-1 min-h-8 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
             equipado
-              ? 'bg-[#9bb6cc] text-[#0b1016]'
-              : 'bg-[#161920] text-[#d5dae3] hover:bg-[#1e232c]'
+              ? 'bg-[var(--accent-gold)] text-[#111] hover:bg-[#e2c598]'
+              : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[#1f1f1a]'
           }`}
         >
           {equipado ? 'Equipado' : 'Equipar'}
@@ -123,15 +131,15 @@ export const ItemTile: React.FC<Props> = ({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onMoverBaul(inv.id, !!en_baul); }}
-            className={`min-h-10 min-w-10 inline-flex items-center justify-center ${
+            className={`min-h-8 min-w-9 inline-flex items-center justify-center transition-colors cursor-pointer ${
               en_baul
-                ? 'bg-[#243040] text-[#c5d4e4]'
-                : 'bg-[#161920] text-[#9aa1ae] hover:text-[#eceef2]'
+                ? 'bg-[#252e3d] text-[var(--text-main)]'
+                : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[#1f1f1a]'
             }`}
             aria-label={en_baul ? 'Mover a la mochila' : 'Guardar en el baúl'}
             title={en_baul ? 'Mover a la mochila' : 'Guardar en el baúl'}
           >
-            {en_baul ? <Package className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+            {en_baul ? <Package className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
           </button>
         )}
       </div>
