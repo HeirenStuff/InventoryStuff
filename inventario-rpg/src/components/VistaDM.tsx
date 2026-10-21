@@ -3,7 +3,7 @@ import type { Personaje, ItemInventario, ItemCatalogo, ItemMesaComun, Tienda, So
 import { 
   inventoryApi, cobreAMonedas, monedasACobre, formatearPrecio, ItemIcon, supabase 
 } from '../services/inventoryApi';
-import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta la ruta si es necesario
+import { getItemTypeClass, formatearPeso } from '../../utils/itemTheme'; // Ajusta la ruta si es necesario
 import { MesaComun } from './MesaComun';
 import { StoreCard } from './StoreCard';
 import { 
@@ -292,7 +292,9 @@ export const VistaDM: React.FC<Props> = ({
                           <ItemIcon name={item.icono} className="w-5 h-5" />
                         </div>
                         <p className="text-xs font-semibold text-[var(--text-main)] text-center line-clamp-2 leading-tight">{item.nombre}</p>
-                        <p className="text-[11px] text-[var(--text-muted)] font-mono mt-1">{item.peso} lbs</p>
+                        <p className="text-[11px] text-[var(--text-muted)] font-mono mt-1">
+                          {formatearPeso(item.peso)}
+                        </p>
                       </div>
 
                       <div className="flex border-t border-[var(--border-color)] bg-[var(--panel-dark)]">
@@ -489,7 +491,7 @@ export const VistaDM: React.FC<Props> = ({
 
                       <div className="text-xs text-[var(--text-muted)] font-mono">
                         <span className={pSobrecarga ? "text-[#c25953] font-bold" : ""}>
-                          {pPeso.toFixed(1)} / {pMaxPeso} lbs
+                          {formatearPeso(pPeso)} / {formatearPeso(pMaxPeso)}
                         </span>
                       </div>
                     </div>
@@ -539,7 +541,9 @@ export const VistaDM: React.FC<Props> = ({
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-xs font-semibold text-[var(--text-main)] truncate leading-tight">{inv.item.nombre}</p>
-                                  <p className="text-[10px] font-mono text-[var(--text-muted)] mt-0.5">{(inv.item.peso * inv.cantidad).toFixed(1)} lbs</p>
+                                  <p className="text-[10px] font-mono text-[var(--text-muted)] mt-0.5">
+                                    {formatearPeso(inv.item.peso * inv.cantidad)}
+                                  </p>
                                 </div>
                               </div>
 
