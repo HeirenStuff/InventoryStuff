@@ -3,6 +3,7 @@ import type { Personaje, ItemInventario, ItemMesaComun, Tienda, SolicitudTienda 
 import { 
   inventoryApi, cobreAMonedas, formatearPrecio, ItemIcon 
 } from '../services/inventoryApi';
+import { getItemTypeClass } from '../../utils/itemTheme'; // Ajusta la ruta a tu utils/itemTheme
 import { ItemTile } from './ItemTile';
 import { MesaComun } from './MesaComun';
 import { 
@@ -40,7 +41,7 @@ export const VistaJugador: React.FC<Props> = ({
   const [panelMovil, setPanelMovil] = useState<'inventario' | 'mesa' | 'tiendas'>('inventario');
   const [hoverMochila, setHoverMochila] = useState(false);
   const [hoverTiendaId, setHoverTiendaId] = useState<string | null>(null);
-  // Estado para modal de negociación / regateo (Compra y Venta)
+
   const [negociacion, setNegociacion] = useState<{
     tipo: 'compra' | 'venta';
     tiendaId: string;
@@ -99,7 +100,6 @@ export const VistaJugador: React.FC<Props> = ({
           }];
         });
 
-        // 👉 AQUÍ: enviamos la campaña del personaje
         const campanaPj = (personaje as any).campana_id || '01';
         await inventoryApi.soltarEnMesa(personaje.nombre, inv, 1, campanaPj);
         onRecargar();
@@ -199,23 +199,22 @@ export const VistaJugador: React.FC<Props> = ({
     onRecargar();
   };
 
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#07080b] text-[#eceef2]">
+    <div className="min-h-screen flex flex-col bg-[var(--bg-stone)] text-[var(--text-main)]">
       {/* HEADER JUGADOR */}
-      <header className="p-4 bg-[#101218] border-b border-[#2c303a] sticky top-0 z-20">
+      <header className="p-4 bg-[var(--panel-dark)] border-b-2 border-[var(--accent-gold)] sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
           <div className="min-w-0">
-            <h1 className="font-semibold text-lg text-[#eceef2]">{personaje.nombre}</h1>
-            <p className="text-sm text-[#9aa1ae] flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono mt-0.5">
-              <Dumbbell className="w-4 h-4 text-[#6d7380]" />
+            <h1 className="font-bold text-lg text-[var(--text-main)] tracking-wide">{personaje.nombre}</h1>
+            <p className="text-xs text-[var(--text-muted)] flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono mt-0.5">
+              <Dumbbell className="w-3.5 h-3.5 text-[var(--accent-gold-dim)]" />
               <span>FUE {personaje.fuerza}</span>
-              <span className={sobrecargado ? 'text-[#d98989] font-bold' : ''}>
+              <span className={sobrecargado ? 'text-[#c25953] font-bold' : 'text-[var(--accent-gold)]'}>
                 {pesoActual.toFixed(1)} / {pesoMaximo} lbs
               </span>
               {sobrecargado && (
-                <span className="flex items-center gap-1 text-[#d98989] font-bold">
-                  <ShieldAlert className="w-4 h-4" /> Sobrecargado
+                <span className="flex items-center gap-1 text-[#c25953] font-bold">
+                  <ShieldAlert className="w-3.5 h-3.5" /> Sobrecargado
                 </span>
               )}
             </p>
@@ -223,17 +222,17 @@ export const VistaJugador: React.FC<Props> = ({
 
           <div className="flex items-center gap-2">
             <div className="flex" aria-label="Monedas">
-              <div className="coin-chip border-r-0">
-                <span className="text-[10px] uppercase tracking-wider text-[#9aa1ae]">Oro</span>
-                <span className="font-mono font-bold text-[#d4b978]">{monedasDesglose.oro}</span>
+              <div className="coin-chip cp border-r-0">
+                <span className="text-[9px] uppercase tracking-wider font-bold">Oro</span>
+                <span className="font-mono font-bold text-xs text-[var(--coin-gp)]">{monedasDesglose.oro}</span>
               </div>
-              <div className="coin-chip border-r-0">
-                <span className="text-[10px] uppercase tracking-wider text-[#9aa1ae]">Plata</span>
-                <span className="font-mono font-bold text-[#d5dae3]">{monedasDesglose.plata}</span>
+              <div className="coin-chip sp border-r-0">
+                <span className="text-[9px] uppercase tracking-wider font-bold">Plata</span>
+                <span className="font-mono font-bold text-xs text-[var(--coin-sp)]">{monedasDesglose.plata}</span>
               </div>
-              <div className="coin-chip">
-                <span className="text-[10px] uppercase tracking-wider text-[#9aa1ae]">Cobre</span>
-                <span className="font-mono font-bold text-[#b08968]">{monedasDesglose.cobre}</span>
+              <div className="coin-chip gp">
+                <span className="text-[9px] uppercase tracking-wider font-bold">Cobre</span>
+                <span className="font-mono font-bold text-xs text-[var(--coin-cp)]">{monedasDesglose.cobre}</span>
               </div>
             </div>
             <button onClick={onSalir} title="Cambiar de personaje" className="btn-secondary min-w-9 px-2">
@@ -242,16 +241,24 @@ export const VistaJugador: React.FC<Props> = ({
           </div>
         </div>
 
+        {/* BARRA DE PESO */}
         <div className="max-w-6xl mx-auto w-full mt-3">
-          <div className="w-full bg-[#07080b] h-2 overflow-hidden border border-[#2c303a]">
+          <div className="w-full bg-[var(--bg-stone)] h-2 overflow-hidden border border-[var(--border-color)] rounded-xs">
             <div
-              className={`h-full ${sobrecargado ? 'bg-[#d98989]' : pesoActual > pesoMaximo * 0.75 ? 'bg-[#d4b978]' : 'bg-[#7dba9a]'}`}
+              className={`h-full transition-all duration-300 ${
+                sobrecargado 
+                  ? 'bg-[#c25953] shadow-[0_0_8px_#c25953]' 
+                  : pesoActual > pesoMaximo * 0.75 
+                  ? 'bg-[var(--accent-gold)]' 
+                  : 'bg-[#8ea35b]'
+              }`}
               style={{ width: `${Math.min((pesoActual / pesoMaximo) * 100, 100)}%` }}
             />
           </div>
         </div>
 
-        <nav className="max-w-6xl mx-auto mt-3 grid grid-cols-3 border border-[#2c303a] lg:hidden">
+        {/* NAVEGACIÓN MÓVIL */}
+        <nav className="max-w-6xl mx-auto mt-3 grid grid-cols-3 border border-[var(--border-color)] lg:hidden rounded-xs overflow-hidden">
           {([
             ['inventario', 'Inventario'],
             ['mesa', 'Mesa'],
@@ -261,9 +268,9 @@ export const VistaJugador: React.FC<Props> = ({
               key={id}
               type="button"
               onClick={() => setPanelMovil(id)}
-              className={`min-h-11 text-sm font-semibold ${
-                panelMovil === id ? 'bg-[#9bb6cc] text-[#0b1016]' : 'bg-[#0c0e13] text-[#9aa1ae]'
-              } ${id !== 'inventario' ? 'border-l border-[#2c303a]' : ''}`}
+              className={`min-h-10 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                panelMovil === id ? 'bg-[var(--accent-gold)] text-[#111]' : 'bg-[var(--panel)] text-[var(--text-muted)]'
+              } ${id !== 'inventario' ? 'border-l border-[var(--border-color)]' : ''}`}
             >
               {label}
             </button>
@@ -273,55 +280,56 @@ export const VistaJugador: React.FC<Props> = ({
 
       {/* CUERPO DEL INVENTARIO */}
       <div className="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* COLUMNA IZQUIERDA: MOCHILA Y BAÚL */}
         <section
           onDragOver={(e) => { e.preventDefault(); setHoverMochila(true); }}
           onDragLeave={() => setHoverMochila(false)}
           onDrop={handleDropEnMochila}
-          className={`${panelMovil === 'inventario' ? 'flex' : 'hidden'} lg:flex lg:col-span-7 rpg-panel flex-col space-y-3 ${
-            hoverMochila ? 'border-[#7dba9a] bg-[#101816]' : ''
+          className={`${panelMovil === 'inventario' ? 'flex' : 'hidden'} lg:flex lg:col-span-7 rpg-panel flex-col space-y-3 transition-colors ${
+            hoverMochila ? 'border-[var(--accent-gold)] shadow-[0_0_15px_rgba(209,177,129,0.2)]' : ''
           }`}
         >
           <div className="flex flex-wrap justify-between items-center gap-2">
-            <div className="flex border border-[#2c303a]" role="tablist">
+            <div className="flex border border-[var(--border-color)] rounded-xs overflow-hidden" role="tablist">
               <button
                 onClick={() => setVistaJugadorTab('mochila')}
-                className={`flex items-center gap-1.5 px-3 min-h-10 text-sm font-semibold ${
-                  vistaJugadorTab === 'mochila' ? 'bg-[#9bb6cc] text-[#0b1016]' : 'bg-[#0c0e13] text-[#9aa1ae] hover:text-[#eceef2]'
+                className={`flex items-center gap-1.5 px-3 min-h-8 text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors ${
+                  vistaJugadorTab === 'mochila' ? 'bg-[var(--accent-gold)] text-[#111]' : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
-                <Package className="w-4 h-4" /> Mochila ({itemsMochila.length})
+                <Package className="w-3.5 h-3.5" /> Mochila ({itemsMochila.length})
               </button>
 
               {personaje.baul_habilitado && (
                 <button
                   onClick={() => setVistaJugadorTab('baul')}
-                  className={`flex items-center gap-1.5 px-3 min-h-10 text-sm font-semibold border-l border-[#2c303a] ${
-                    vistaJugadorTab === 'baul' ? 'bg-[#9bb6cc] text-[#0b1016]' : 'bg-[#0c0e13] text-[#9aa1ae] hover:text-[#eceef2]'
+                  className={`flex items-center gap-1.5 px-3 min-h-8 text-xs font-bold uppercase tracking-wider border-l border-[var(--border-color)] cursor-pointer transition-colors ${
+                    vistaJugadorTab === 'baul' ? 'bg-[var(--accent-gold)] text-[#111]' : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
                   }`}
                 >
-                  <Archive className="w-4 h-4" /> Baúl ({itemsBaul.length})
+                  <Archive className="w-3.5 h-3.5" /> Baúl ({itemsBaul.length})
                 </button>
               )}
 
               <button
                 onClick={() => setVistaJugadorTab('grupo')}
-                className={`flex items-center gap-1.5 px-3 min-h-10 text-sm font-semibold border-l border-[#2c303a] ${
-                  vistaJugadorTab === 'grupo' ? 'bg-[#9bb6cc] text-[#0b1016]' : 'bg-[#0c0e13] text-[#9aa1ae] hover:text-[#eceef2]'
+                className={`flex items-center gap-1.5 px-3 min-h-8 text-xs font-bold uppercase tracking-wider border-l border-[var(--border-color)] cursor-pointer transition-colors ${
+                  vistaJugadorTab === 'grupo' ? 'bg-[var(--accent-gold)] text-[#111]' : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
-                <Crown className="w-4 h-4" /> Compañeros
+                <Crown className="w-3.5 h-3.5" /> Compañeros
               </button>
             </div>
 
-            <span className="text-xs text-[#9aa1ae]">
-              {vistaJugadorTab === 'baul' ? 'No suma peso' : 'Pulsa un objeto para ver detalles'}
+            <span className="text-[11px] text-[var(--text-muted)]">
+              {vistaJugadorTab === 'baul' ? 'No suma peso' : 'Pulsa un objeto para detalles'}
             </span>
           </div>
 
           <div className="flex-1 overflow-y-auto max-h-[560px] pr-1">
             {vistaJugadorTab === 'mochila' && (
               itemsMochila.length === 0 ? (
-                <p className="text-center py-16 text-sm text-[#9aa1ae] border border-dashed border-[#2c303a]">
+                <p className="text-center py-16 text-xs text-[var(--text-muted)] border border-dashed border-[var(--border-color)]">
                   Mochila vacía. Toma objetos de la mesa o cómpralos en las tiendas.
                 </p>
               ) : (
@@ -342,7 +350,7 @@ export const VistaJugador: React.FC<Props> = ({
 
             {vistaJugadorTab === 'baul' && (
               itemsBaul.length === 0 ? (
-                <p className="text-center py-16 text-sm text-[#9aa1ae] border border-dashed border-[#2c303a]">
+                <p className="text-center py-16 text-xs text-[var(--text-muted)] border border-dashed border-[var(--border-color)]">
                   Baúl vacío. Usa el icono de cofre en un objeto de la mochila para guardarlo aquí.
                 </p>
               ) : (
@@ -375,47 +383,50 @@ export const VistaJugador: React.FC<Props> = ({
                     );
 
                     return (
-                      <div key={comp.id} className="p-3 border border-[#2c303a] bg-[#0c0e13]">
-                        <div className="flex justify-between items-center pb-2 border-b border-[#2c303a] mb-2">
+                      <div key={comp.id} className="p-3 border border-[var(--border-color)] bg-[var(--panel-dark)] rounded-xs">
+                        <div className="flex justify-between items-center pb-2 border-b border-[var(--border-color)] mb-2">
                           <div>
-                            <h4 className="font-semibold text-sm text-[#eceef2]">{comp.nombre}</h4>
-                            <p className="text-xs font-mono text-[#9aa1ae]">
+                            <h4 className="font-bold text-sm text-[var(--text-main)]">{comp.nombre}</h4>
+                            <p className="text-[11px] font-mono text-[var(--text-muted)]">
                               Carga: {compPeso.toFixed(1)} / {comp.fuerza * 15} lbs
                             </p>
                           </div>
-                          <span className="text-xs font-mono text-[#d4b978] font-bold">
+                          <span className="text-xs font-mono text-[var(--accent-gold)] font-bold">
                             {compMonedas.oro} PO {compMonedas.plata > 0 ? `${compMonedas.plata} PP ` : ''}
                           </span>
                         </div>
 
                         {compItemsVisibles.length === 0 ? (
-                          <p className="text-xs text-[#9aa1ae] italic py-2 text-center">
+                          <p className="text-xs text-[var(--text-muted)] italic py-2 text-center">
                             No lleva objetos visibles en su mochila.
                           </p>
                         ) : (
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {compItemsVisibles.map(inv => (
-                              <div
-                                key={inv.id}
-                                className={`p-2 border text-xs flex flex-col justify-between ${
-                                  inv.equipado ? 'border-[#9bb6cc] bg-[#12161c]' : 'border-[#2c303a] bg-[#101218]'
-                                }`}
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  {inv.equipado ? (
-                                    <span className="text-[10px] font-bold text-[#0b1016] bg-[#9bb6cc] px-1">EQ</span>
-                                  ) : <span />}
-                                  <span className="font-mono text-[#eceef2] font-bold">x{inv.cantidad}</span>
+                            {compItemsVisibles.map(inv => {
+                              const tipoClase = getItemTypeClass(inv.item);
+                              return (
+                                <div
+                                  key={inv.id}
+                                  className={`rpg-card ${tipoClase} p-2 text-xs flex flex-col justify-between ${
+                                    inv.equipado ? 'ring-1 ring-[var(--accent-gold)]' : ''
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    {inv.equipado ? (
+                                      <span className="text-[9px] font-bold text-[#111] bg-[var(--accent-gold)] px-1 rounded-xs">EQ</span>
+                                    ) : <span />}
+                                    <span className="font-mono text-[var(--accent-gold)] font-bold">x{inv.cantidad}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 my-1">
+                                    <ItemIcon name={inv.item.icono} className="w-4 h-4 text-[var(--accent-gold)] shrink-0" />
+                                    <span className="truncate font-semibold text-[var(--text-main)]">{inv.item.nombre}</span>
+                                  </div>
+                                  <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                                    {(inv.item.peso * inv.cantidad).toFixed(1)} lbs
+                                  </span>
                                 </div>
-                                <div className="flex items-center gap-1.5 my-1">
-                                  <ItemIcon name={inv.item.icono} className="w-4 h-4 text-[#c5d4e4] shrink-0" />
-                                  <span className="truncate font-medium text-[#eceef2]">{inv.item.nombre}</span>
-                                </div>
-                                <span className="text-[11px] font-mono text-[#9aa1ae]">
-                                  {(inv.item.peso * inv.cantidad).toFixed(1)} lbs
-                                </span>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -440,26 +451,28 @@ export const VistaJugador: React.FC<Props> = ({
           </div>
 
           <div className={`${panelMovil === 'tiendas' ? 'block' : 'hidden'} lg:block rpg-panel space-y-3`}>
-            <div className="flex flex-wrap items-end justify-between gap-2 border-b border-[#2c303a] pb-3">
+            <div className="flex flex-wrap items-end justify-between gap-2 border-b border-[var(--border-color)] pb-3">
               <div>
-                <h3 className="section-title flex items-center gap-2">
-                  <Store className="w-4 h-4" /> Mercaderes
+                <h3 className="section-title flex items-center gap-2 !mb-0 !border-b-0">
+                  <Store className="w-4 h-4 text-[var(--accent-gold)]" /> Mercaderes
                 </h3>
-                <p className="text-xs text-[#9aa1ae] mt-1">Arrastra un objeto para solicitar su venta al 50%.</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Arrastra un objeto para solicitar su venta al 50%.</p>
               </div>
-              <span className="text-sm font-mono border border-[#2c303a] px-2 py-1">{tiendasAbiertas.length}</span>
+              <span className="text-xs font-mono font-bold text-[var(--accent-gold)] border border-[var(--border-color)] bg-[var(--panel-dark)] px-2 py-0.5 rounded-xs">
+                {tiendasAbiertas.length}
+              </span>
             </div>
 
             {/* Aviso de peticiones pendientes */}
             {solicitudes.filter(s => s.personaje_id === personaje.id).length > 0 && (
-              <div className="p-2 border border-[#9bb6cc] bg-[#10141a] text-xs text-[#c5d4e4] flex items-center gap-2">
-                <Clock className="w-4 h-4 animate-spin text-[#9bb6cc]" />
+              <div className="p-2 border border-[var(--accent-gold)] bg-[var(--panel-dark)] text-xs text-[var(--accent-gold)] flex items-center gap-2 rounded-xs">
+                <Clock className="w-4 h-4 animate-spin text-[var(--accent-gold)]" />
                 <span>Tienes transacciones pendientes de autorización por el DM.</span>
               </div>
             )}
 
             {tiendasAbiertas.length === 0 ? (
-              <p className="text-center py-6 text-sm text-[#9aa1ae] border border-dashed border-[#2c303a]">
+              <p className="text-center py-6 text-xs text-[var(--text-muted)] border border-dashed border-[var(--border-color)]">
                 No hay mercaderes abiertos.
               </p>
             ) : (
@@ -474,49 +487,51 @@ export const VistaJugador: React.FC<Props> = ({
                       onDragOver={(e) => { e.preventDefault(); setHoverTiendaId(t.id); }}
                       onDragLeave={() => setHoverTiendaId(null)}
                       onDrop={(e) => handleDropVenderEnTienda(e, t.id)}
-                      className={`p-3 border transition-colors ${
-                        isHovered ? 'border-[#d4b978] bg-[#16140f]' : 'bg-[#0c0e13] border-[#2c303a]'
+                      className={`p-3 border rounded-xs transition-colors ${
+                        isHovered ? 'border-[var(--accent-gold)] bg-[var(--panel)] shadow-[0_0_15px_rgba(209,177,129,0.2)]' : 'bg-[var(--panel-dark)] border-[var(--border-color)]'
                       }`}
                     >
-                      <div className="flex justify-between items-center mb-2 pb-2 border-b border-[#2c303a]">
+                      <div className="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border-color)]">
                         <div className="flex items-center gap-1.5">
-                          <ShoppingBag className="w-4 h-4 text-[#7dba9a]" />
-                          <h4 className="font-semibold text-sm text-[#eceef2]">{t.nombre}</h4>
+                          <ShoppingBag className="w-4 h-4 text-[var(--accent-gold)]" />
+                          <h4 className="font-bold text-sm text-[var(--text-main)]">{t.nombre}</h4>
                         </div>
-                        <span className="text-xs text-[#9aa1ae]">
+                        <span className="text-[11px] text-[var(--text-muted)]">
                           {isHovered ? '¡Suelta aquí para negociar venta!' : 'Arrastra objetos aquí para vender'}
                         </span>
                       </div>
 
                       {items.length === 0 ? (
-                        <p className="text-sm text-[#9aa1ae] py-2 text-center">Sin artículos en venta.</p>
+                        <p className="text-xs text-[var(--text-muted)] py-2 text-center">Sin artículos en venta.</p>
                       ) : (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           {items.map(ti => {
                             const mult = typeof t.multiplicador_precio === 'number' && t.multiplicador_precio > 0 ? t.multiplicador_precio : 1.0;
                             const precioBase = ti.precio_cobre_override ?? ti.item.precio_cobre;
                             const precioTotal = Math.round(precioBase * mult);
                             const saldoActual = personaje.monedas_cobre || 0;
                             const puedeComprar = saldoActual >= precioTotal && (ti.stock === null || ti.stock > 0);
+                            const tipoClase = getItemTypeClass(ti.item);
 
                             return (
                               <div
                                 key={ti.id}
-                                className="flex items-center justify-between gap-2 p-2 bg-[#101218] border border-[#2c303a]"
+                                className={`rpg-card ${tipoClase} flex items-center justify-between gap-2 p-2`}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <ItemIcon name={ti.item.icono} className="w-5 h-5 text-[#c5d4e4] shrink-0" />
+                                  <div className="p-1 rounded-xs bg-[var(--panel-dark)] border border-[var(--border-color)] shrink-0">
+                                    <ItemIcon name={ti.item.icono} className="w-4 h-4 text-[var(--accent-gold)]" />
+                                  </div>
                                   <div className="min-w-0">
-                                    <p className="font-semibold text-sm text-[#eceef2] truncate">{ti.item.nombre}</p>
-                                    <p className="text-xs text-[#d4b978] font-mono">
+                                    <p className="font-semibold text-xs text-[var(--text-main)] truncate">{ti.item.nombre}</p>
+                                    <p className="text-[11px] text-[var(--accent-gold)] font-mono">
                                       {formatearPrecio(precioTotal)}
-                                      <span className="text-[#9aa1ae] ml-1.5">· {ti.stock ?? '∞'}</span>
+                                      <span className="text-[var(--text-muted)] ml-1.5">· {ti.stock ?? '∞'}</span>
                                     </p>
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-1.5 shrink-0">
-                                  {/* Botón para abrir regateo de compra con slider */}
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -536,7 +551,6 @@ export const VistaJugador: React.FC<Props> = ({
                                     Regatear
                                   </button>
 
-                                  {/* Compra directa al precio oficial */}
                                   <button
                                     disabled={!puedeComprar}
                                     onClick={async () => {
@@ -550,7 +564,7 @@ export const VistaJugador: React.FC<Props> = ({
                                       });
                                       onRecargar();
                                     }}
-                                    className="btn-success py-1 px-2.5 text-xs"
+                                    className="btn-primary py-1 px-2.5 text-xs"
                                   >
                                     {puedeComprar ? 'Comprar' : 'Sin oro'}
                                   </button>
@@ -569,45 +583,42 @@ export const VistaJugador: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* MODAL DE NEGOCIACIÓN / REGATEO CON SLIDER (COMPRA Y VENTA) */}
+      {/* MODAL DE NEGOCIACIÓN / REGATEO CON SLIDER */}
       {negociacion && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="rpg-panel max-w-sm w-full space-y-4">
-            <div className="border-b border-[#2c303a] pb-2 flex justify-between items-center">
-              <h3 className="section-title text-sm flex items-center gap-1.5">
-                <ShoppingBag className="w-4 h-4 text-[#d4b978]" />
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="rpg-panel max-w-sm w-full space-y-4 border-2 border-[var(--accent-gold)] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <div className="border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
+              <h3 className="section-title text-sm flex items-center gap-1.5 !mb-0 !border-b-0">
+                <ShoppingBag className="w-4 h-4 text-[var(--accent-gold)]" />
                 {negociacion.tipo === 'compra' ? 'Regatear Compra' : 'Negociar Venta'}
               </h3>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase ${
-                negociacion.tipo === 'compra' ? 'bg-[#1a2a22] text-[#7dba9a]' : 'bg-[#2a1e14] text-[#d4b978]'
-              }`}>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase bg-[var(--panel-dark)] text-[var(--accent-gold)] border border-[var(--border-color)] rounded-xs">
                 {negociacion.tiendaNombre}
               </span>
             </div>
 
-            <div className="flex items-center gap-2.5 p-2 bg-[#0c0e13] border border-[#2c303a]">
-              <div className="p-2 border border-[#2c303a] bg-[#07080b] text-[#c5d4e4]">
+            <div className="flex items-center gap-2.5 p-2 bg-[var(--panel-dark)] border border-[var(--border-color)] rounded-xs">
+              <div className="p-2 border border-[var(--border-color)] bg-[var(--bg-stone)] text-[var(--accent-gold)] rounded-xs">
                 <ItemIcon name={negociacion.item.icono} className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-sm text-[#eceef2] truncate">{negociacion.item.nombre}</p>
-                <p className="text-xs text-[#9aa1ae]">
+                <p className="font-semibold text-sm text-[var(--text-main)] truncate">{negociacion.item.nombre}</p>
+                <p className="text-xs text-[var(--text-muted)]">
                   {negociacion.tipo === 'compra' ? 'Precio de lista: ' : 'Precio habitual (50%): '}
-                  <strong className="text-[#eceef2]">{formatearPrecio(negociacion.precioBaseCobre)}</strong>
+                  <strong className="text-[var(--accent-gold)] font-mono">{formatearPrecio(negociacion.precioBaseCobre)}</strong>
                 </p>
               </div>
             </div>
 
             {/* SECCIÓN DEL SLIDER Y VALOR OFERTADO */}
-            <div className="space-y-3 bg-[#0c0e13] p-3 border border-[#2c303a]">
+            <div className="space-y-3 bg-[var(--panel-dark)] p-3 border border-[var(--border-color)] rounded-xs">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-[#9aa1ae] uppercase tracking-wider font-semibold">Tu oferta propuesta:</span>
-                <span className="font-mono font-bold text-sm text-[#d4b978]">
+                <span className="text-[var(--text-muted)] uppercase tracking-wider font-bold">Tu oferta:</span>
+                <span className="font-mono font-bold text-sm text-[var(--accent-gold)]">
                   {formatearPrecio(ofertaCobre)}
                 </span>
               </div>
 
-              {/* Slider de porcentaje interactivo (desde 10% hasta 200% del valor base) */}
               <input
                 type="range"
                 min={0}
@@ -615,18 +626,17 @@ export const VistaJugador: React.FC<Props> = ({
                 step={Math.max(1, Math.round(negociacion.precioBaseCobre * 0.05))}
                 value={ofertaCobre}
                 onChange={(e) => setOfertaCobre(Number(e.target.value))}
-                className="w-full cursor-pointer accent-[#d4b978]"
+                className="w-full cursor-pointer accent-[var(--accent-gold)]"
               />
 
-              <div className="flex justify-between text-[11px] text-[#9aa1ae] font-mono">
+              <div className="flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
                 <span>0% (Gratis)</span>
                 <span>100% (Base)</span>
                 <span>200% (Doble)</span>
               </div>
 
-              {/* Input numérico directo por si quieren ajustar en Piezas de Oro exactas */}
-              <div className="pt-2 border-t border-[#2c303a] flex items-center justify-between gap-2">
-                <span className="text-xs text-[#9aa1ae]">Ajustar en Oro (PO):</span>
+              <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between gap-2">
+                <span className="text-xs text-[var(--text-muted)]">Ajustar en Oro (PO):</span>
                 <input
                   type="number"
                   min="0"
@@ -635,7 +645,7 @@ export const VistaJugador: React.FC<Props> = ({
                     const po = Math.max(0, parseInt(e.target.value) || 0);
                     setOfertaCobre(po * 100 + (ofertaCobre % 100));
                   }}
-                  className="w-24 rpg-input text-center font-mono font-bold text-xs text-[#d4b978]"
+                  className="w-24 rpg-input text-center font-mono font-bold text-xs text-[var(--accent-gold)]"
                 />
               </div>
             </div>
