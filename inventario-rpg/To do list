@@ -1,11 +1,17 @@
 //Importantes
-- Editar y eliminar tiendas
-- Poder regatear precios individuales
+- Que funcione el tema de los colores
+- No funciona cuando elimino un objeto desde la app
+- Que cada jugador pueda hacer notas a un objeto (notas en objeto ya esta creado)
+- Apartado de "Notas" donde poder modificar y dejar anotaciones personales de jugador
+- Servicios como tal, no items, tipo peajes (esto tiene que ser del lado del jugador supongo? y otro del lado del dm que pueda pedir la cantidad que solicite yo)
+- Una conversion de libras a kilos
 
 //Secundarios
 - que cuando estas un segundo con el mouse quieto encima del objeto te pase a la descripcion
 
 Hechos
+- Editar y eliminar tiendas
+- Poder regatear precios individuales
 - Que cuando un item tiene precio en plata o cobre tambien lo marque dinamicamente
 - Que se actualice automaticamente en cada paso la aplicacion
 - Poder ver las cosas de los demas
