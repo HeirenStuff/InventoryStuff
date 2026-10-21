@@ -186,23 +186,6 @@
 .coin-chip.pp { border-bottom: 2px solid var(--coin-pp); color: var(--coin-pp); }
 
 /* ============================================================
-   PALETAS DE COLOR POR TIPO DE OBJETO (Estilo Track-Cards)
-   ============================================================ */
-.item-weapon   { --t-color-1: #d93838; --t-color-2: #6e1515; } /* Carmesí forja vivo */
-.item-armor    { --t-color-1: #3d7fd4; --t-color-2: #163259; } /* Azul cobalto brillante */
-.item-potion   { --t-color-1: #d92b7c; --t-color-2: #690f38; } /* Magenta alquímico */
-.item-scroll   { --t-color-1: #5cb83b; --t-color-2: #245714; } /* Verde papiro vibrante */
-.item-ring     { --t-color-1: #e6a817; --t-color-2: #754e04; } /* Oro ámbar resplandeciente */
-.item-wondrous { --t-color-1: #a846eb; --t-color-2: #4f1578; } /* Violeta arcano intenso */
-.item-misc     { --t-color-1: #69695c; --t-color-2: #36362e; } /* Piedra rúnica */
-
-/* ============================================================
-   TARJETAS COMPLETAS CON COLOR Y TEXTURA
-   ============================================================ */
-/* ============================================================
-   1. PALETAS DE COLOR PURAS Y SATURADAS (Fórmula Track-Card)
-   ============================================================ */
-/* ============================================================
    PALETAS DE COLOR VIVAS (Sistema de 9 Categorías D&D)
    ============================================================ */
 /* 1. Armas: Carmesí Forja */
@@ -217,31 +200,31 @@
   --t-color-2: #103778 !important; 
 }
 
-/* 3. Munición: Naranja Táctico / Balística */
+/* 3. Munición: Naranja Táctico */
 .item-ammo, [class*="item-ammo"] { 
   --t-color-1: #fb8500 !important; 
   --t-color-2: #803a00 !important; 
 }
 
-/* 4. Alimentos y Bebidas: Verde Olivo / Campestre */
+/* 4. Alimentos y Bebidas: Verde Olivo */
 .item-food, [class*="item-food"] { 
   --t-color-1: #8cb369 !important; 
   --t-color-2: #436625 !important; 
 }
 
-/* 5. Pociones: Magenta Alquímico Vibrante */
+/* 5. Pociones: Magenta Alquímico */
 .item-potion, [class*="item-potion"] { 
   --t-color-1: #ff007f !important; 
   --t-color-2: #7a003c !important; 
 }
 
-/* 6. Magia y Pergaminos: Cian Arcano / Rúnico */
+/* 6. Magia y Pergaminos: Cian Arcano */
 .item-magic, [class*="item-magic"] { 
   --t-color-1: #00f5d4 !important; 
   --t-color-2: #026b5d !important; 
 }
 
-/* 7. Herramientas: Ocre / Bronce de Forja */
+/* 7. Herramientas: Ocre / Bronce */
 .item-tool, [class*="item-tool"] { 
   --t-color-1: #d4a373 !important; 
   --t-color-2: #6c4b26 !important; 
@@ -260,7 +243,7 @@
 }
 
 /* ============================================================
-   2. TARJETA FORZADA AL ESTILO TRACK-CARD
+   TARJETAS COMPLETAS (Fórmula Track-Card)
    ============================================================ */
 .rpg-card {
   --t-color-1: #8a8f99;
@@ -268,36 +251,17 @@
 
   position: relative !important;
   border-radius: 6px !important;
-  /* Borde vivo y ancho idéntico a track-card */
   border: 2px solid var(--t-color-1) !important;
-  
-  /* Gradiente idéntico al de tu otra app: primero el degradado de color vivo, con filtro oscuro suave */
   background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)),
               linear-gradient(135deg, var(--t-color-1), var(--t-color-2)) !important;
-              
-  filter: saturate(1.4) brightness(1.05) !important;
+  filter: saturate(1.2) brightness(0.92);
+  opacity: 0.94;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.25s ease !important;
   overflow: hidden !important;
 }
 
-/* Anulamos cualquier fondo negro que los divs internos intenten poner */
-.rpg-card * {
-  background-color: transparent !important;
-}
-
-/* Rescatamos solo los chips y textos que necesitan contraste para leerse */
-.rpg-card span.font-mono,
-.rpg-card .rpg-badge {
-  background-color: rgba(0, 0, 0, 0.65) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.rpg-card button:last-child {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Textura hexagonal idéntica al código original de audio */
+/* Textura hexagonal de fondo */
 .rpg-card::before {
   content: "" !important;
   position: absolute !important;
@@ -309,18 +273,53 @@
   z-index: 1 !important;
 }
 
-/* HOVER: Brillo idéntico a las track-cards cuando estaban activas */
+/* Transparencia interna para que el color de fondo respire */
+.rpg-card * {
+  background-color: transparent !important;
+}
+
+/* Rescate de badges numéricos para contraste */
+.rpg-card span.font-mono,
+.rpg-card .rpg-badge {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Hover de tarjeta */
 .rpg-card:hover {
   filter: saturate(1.8) brightness(1.2) !important;
   border-color: #ffffff !important;
   box-shadow: 0 0 20px var(--t-color-1) !important;
+  opacity: 1 !important;
   transform: translateY(-2px);
 }
 
-/* Halo dorado si está equipado */
+/* ============================================================
+   ESTADO EQUIPADO (Más grande, aura dorada y botón sólido)
+   ============================================================ */
 .rpg-card.ring-1 {
+  transform: scale(1.03) !important;
+  filter: saturate(1.5) brightness(1.15) !important;
+  opacity: 1 !important;
   border-color: var(--accent-gold) !important;
-  box-shadow: 0 0 14px rgba(209, 177, 129, 0.45) !important;
+  box-shadow: 0 0 16px rgba(209, 177, 129, 0.45), 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  z-index: 5;
+}
+
+/* Botón inferior dorado sólido con letras negras nítidas */
+.rpg-card.ring-1 button[class*="bg-[var(--accent-gold)]"],
+.rpg-card.ring-1 button:first-of-type {
+  background-color: var(--accent-gold) !important;
+  color: #111111 !important;
+  font-weight: 800 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Badge EQ superior */
+.rpg-card.ring-1 span[class*="bg-[var(--accent-gold)]"] {
+  background-color: var(--accent-gold) !important;
+  color: #111111 !important;
+  font-weight: 800 !important;
 }
 
 /* ============================================================
@@ -340,28 +339,6 @@
 .rpg-card:has(button[title="Mover a la mochila"]) {
   filter: saturate(0.45) brightness(0.65) !important;
   opacity: 0.85;
-}
-
-
-/* Cosa que hace que las tarjetas tengan color bien?*/
-.rpg-card > div,
-.rpg-card > button,
-.rpg-card .p-2 {
-  background-color: transparent !important;
-}
-
-/* Solo los badges y botones mantienen un contraste legible */
-.rpg-card span.font-mono,
-.rpg-card .rpg-badge {
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(4px);
-}
-
-.rpg-card button:last-child {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-}
-.rpg-card button:last-child:hover {
-  background-color: rgba(0, 0, 0, 0.7) !important;
 }
 
 /* ============================================================

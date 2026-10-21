@@ -120,8 +120,8 @@ export const ItemTile: React.FC<Props> = ({
           onClick={(e) => { e.stopPropagation(); onToggleEquipar(inv.id); }}
           className={`flex-1 min-h-8 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
             equipado
-              ? 'bg-[var(--accent-gold)] text-[#111] hover:bg-[#e2c598]'
-              : 'bg-[var(--panel-dark)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[#1f1f1a]'
+              ? '!bg-[var(--accent-gold)] !text-[#111111] shadow-inner'
+              : '!bg-black/50 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:!bg-black/70'
           }`}
         >
           {equipado ? 'Equipado' : 'Equipar'}
